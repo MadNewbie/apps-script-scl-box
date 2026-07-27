@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <base target="_top">
+  </head>
+  <body>
+    <form id="formTambahKotak" class="container">
+      <div id="message"></div>
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="jenisKotak" class="form-label">Jenis Kotak:</label>
+              <select id="jenisKotak" name="jenisKotak" class="form-control">
+                <option value="">--Pilih Jenis Kotak--</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="jenisDokumen" class="form-label">Jenis Dokumen:</label>
+              <select id="jenisDokumen" class="form-control" name="jenisDokumen" disabled>
+                <option value="">--Pilih Jenis Dokumen--</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="gudang" class="form-label">Gudang:</label>
+              <select id="gudang" name="gudang" class="form-control">
+                <option value="">--Pilih Gudang--</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="periode" class="form-label">Periode:</label>
+              <div class="container">
+                <div class="row">
+                  <input class="col form-control" type="text" id="awalPeriode" name="awalPeriode"/>
+                  <div class="col text-center">
+                    -
+                  </div>
+                  <input class="col form-control" type="text" id="akhirPeriode" name="akhirPeriode"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="area" class="form-label">Area:</label>
+              <select id="area" name="area" multiple class="form-control">
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="labelKotak" class="form-label">Label Kotak:</label>
+              <input type="text" id="labelKotak" name="labelKotak" class="form-control" readonly/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="kps" class="my-2"></div>
+      <div class="row">
+        <div class="col-md-6 col-12">
+          <label for="dokumenLain" class="form-label">Dokumen Lain:</label>
+          <textarea name="dokumenLain" class="form-control"></textarea>
+        </div>
+        <div class="col-md-6 col-12">
+          <label for="catatan" class="form-label">Catatan:</label>
+          <textarea name="catatan" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="row my-4">
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-md btn-primary">Simpan</button>
+        </div>
+      </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      google.script.run
+        .withSuccessHandler(populateAreaDropdown)
+        .withFailureHandler(showError)
+        .getDropdownAreaData()
+
+      google.script.run
+        .withSuccessHandler(populateJenisKotakDropdown)
+        .withFailureHandler(showError)
+        .getDropdownJenisKotakData()
+
+      // google.script.run
+      //   .withSuccessHandler(populateJenisDokumenDropdown)
+      //   .withFailureHandler(showError)
+      //   .getDropdownJenisDokumenData()
+
+      google.script.run
+        .withSuccessHandler(populateGudangDropdown)
+        .withFailureHandler(showError)
+        .getDropdownGudangData()
+
+      function getKpsDate(kps, periode) {
+        if (periode > 1000) {
+          firstDayOfYear = new Date(periode, 0, 1)
+          firstDayOfWeek = firstDayOfYear.getDay()
+          offset = firstDayOfWeek === 0 ? 0 : firstDayOfWeek
+
+          startDate = new Date(
+            firstDayOfYear.getFullYear(),
+            0,
+            1-offset+1+(kps-1)*7
+          )
+
+          endDate = new Date(startDate)
+          endDate.setDate(startDate.getDate() + 6)
+        }
+        return {
+          startDate: startDate,
+          endDate: endDate
+        }
+      }
+
+      function showError(error) {
+        window.alert(error)
+      }
+
+      function populateJenisKotakDropdown(data) {
+        var el = document.getElementById('jenisKotak')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateJenisDokumenDropdown(data) {
+        var el = document.getElementById('jenisDokumen')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateAreaDropdown(data) {
+        var el = document.getElementById('area')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateGudangDropdown(data) {
+        var el = document.getElementById('gudang')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function generateContentDivKps() {
+        var elTabContainer = document.getElementById('kps')
+        elTabContainer.textContent = ''
+        if (document.getElementById('jenisDokumen').value === 'Retail' || document.getElementById('jenisDokumen').value === 'Non Retail'){
+          generateTabYear()
+        } else {
+          generatePeriodeCheckbox()
+        }
+      }
+
+      function generatePeriodeCheckbox() {
+        var awalPeriode = document.getElementById('awalPeriode').value
+        var akhirPeriode = document.getElementById('akhirPeriode').value
+        var elDivRow = document.createElement('div')
+        var elTabContainer = document.getElementById('kps')
+        elDivRow.className = 'row'
+        for (var x=parseInt(awalPeriode); x<=parseInt(akhirPeriode); x++) {
+          var elDivCol3 = document.createElement('div')
+          elDivCol3.className = 'col-3'
+          var elCb = document.createElement('input')
+          elCb.setAttribute('type','checkbox')
+          elCb.name = `periode[${x}]`
+          elCb.value = x
+          elCb.id = `periode[${x}]`
+          elCb.className = `form-check-input me-2 cb-periode`
+          var elLabel = document.createElement('label')
+          elLabel.textContent = `${x}`
+          elLabel.className = `form-check-label`
+          elLabel.setAttribute("for",`periode[${x}]`)
+          elDivCol3.appendChild(elCb)
+          elDivCol3.appendChild(elLabel)
+          elDivRow.appendChild(elDivCol3)
+        }
+        elTabContainer.appendChild(elDivRow)
+      }
+
+      function generateTabYear() {
+        var awalPeriode = document.getElementById('awalPeriode').value
+        var akhirPeriode = document.getElementById('akhirPeriode').value
+        var elTabContainer = document.getElementById('kps')
+        elTabContainer.textContent = ''
+        if (awalPeriode!=='' && akhirPeriode!=='') {
+          if (isNaN(parseInt(awalPeriode)) || isNaN(parseInt(akhirPeriode))) {
+            window.alert("Pastikan awal dan akhir periode diisi dengan tahun yang valid")
+            return
+          }
+        }
+        difPeriode = akhirPeriode - awalPeriode
+        if (difPeriode < 0) {
+          window.alert("awal periode lebih besar dari akhir periode")
+          return
+        } 
+        if (difPeriode >= 0 && difPeriode < 10) {
+          // deklarasi elemen ul
+          var elUlTab = document.createElement('ul')
+          elUlTab.className = "nav nav-tabs"
+          elUlTab.id = "kpsTab"
+          elUlTab.setAttribute("role","tablist")
+
+          // deklarasi tab pane container
+          var elDivTab = document.createElement('div')
+          elDivTab.className = "tab-content"
+          elDivTab.id = "kpsTabContent"
+
+          for (var yearDifferent=0; yearDifferent <= difPeriode; yearDifferent++) {
+            var tahun = parseInt(awalPeriode) + yearDifferent
+            // deklarasi li
+            var elLiTab = document.createElement('li')
+            elLiTab.className = "nav-item"
+            elLiTab.setAttribute("role","presentation")
+
+            // deklarasi button
+            var elBtnTab = document.createElement('button')
+            if (tahun == awalPeriode) {
+              elBtnTab.className = "nav-link active"
+              elBtnTab.setAttribute("aria-selected","true")
+            } else {
+              elBtnTab.className = "nav-link"
+              elBtnTab.setAttribute("aria-selected","false")
+            }
+            elBtnTab.id=`year-${tahun}-tab`
+            elBtnTab.setAttribute("data-bs-toggle","tab")
+            elBtnTab.setAttribute("data-bs-target",`#year-${tahun}-tab-pane`)
+            elBtnTab.setAttribute("type","button")
+            elBtnTab.setAttribute("role","tab")
+            elBtnTab.setAttribute("aria-controls",`year-${tahun}-tab-pane`)
+            elBtnTab.textContent = tahun
+
+            elLiTab.appendChild(elBtnTab)
+            elUlTab.appendChild(elLiTab)
+
+            // deklarasi checkbox dan kolom tab pane kps
+            elDivContainerLv1=document.createElement('div')
+            elDivContainerLv1.className = "container"
+            elDivRowLv1=document.createElement('div')
+            elDivRowLv1.className = "row"
+            elDivContainerLv1.appendChild(elDivRowLv1)
+            for (var week=1; week <= 52; week++) {
+              let kpsDate=getKpsDate(week, tahun)
+
+              awalKps = `${kpsDate.startDate.getDate()} ${kpsDate.startDate.toLocaleString('id-ID',{month:'short'})}`
+              endKps = `${kpsDate.endDate.getDate()} ${kpsDate.endDate.toLocaleString('id-ID',{month:'short'})}`
+
+              if (week==1 || week==14 || week==27 || week==40) {
+                elDivColKps = document.createElement('div')
+                elDivColKps.className = "col"
+                elDivContainerCol = document.createElement('div')
+                elDivContainerCol.className = "container"
+                elUl = document.createElement('ul')
+                elUl.className = "list-group"
+                elDivContainerCol.appendChild(elUl)
+                elDivColKps.appendChild(elDivContainerCol)
+                elDivRowLv1.appendChild(elDivColKps)
+              }
+
+              elLiKps = document.createElement('li')
+              elLiKps.className = "list-group-item"
+              elCbKps = document.createElement('input')
+              elCbKps.setAttribute("type","checkbox")
+              elCbKps.className = "form-check-input me-2"
+              elCbKps.name = `kps[${tahun}]`
+              elCbKps.value = week
+              elCbKps.id = `kps[${tahun}]${week}Checkbox`
+              elCbKpsLabel = document.createElement('label')
+              elCbKpsLabel.className = "form-check-label"
+              elCbKpsLabel.setAttribute("for",`kps[${tahun}]${week}Checkbox`)
+              elCbKpsLabel.textContent = `KPS ${week} (${awalKps} -  ${endKps})`
+              elLiKps.appendChild(elCbKps)
+              elLiKps.appendChild(elCbKpsLabel)
+              elUl.appendChild(elLiKps)
+            }
+
+            // deklarasi tab-pane
+            elDivTabPane = document.createElement('div')
+            if (tahun == awalPeriode) {
+              elDivTabPane.className = "tab-pane fade show active"
+            } else {
+              elDivTabPane.className = "tab-pane fade"
+            }
+            elDivTabPane.id = `year-${tahun}-tab-pane`
+            elDivTabPane.setAttribute("role","tabpanel")
+            elDivTabPane.setAttribute("aria-labelledby",`year-${tahun}-tab`)
+            elDivTabPane.setAttribute("tabindex","0")
+            elDivTabPane.appendChild(elDivContainerLv1)
+            elDivTab.appendChild(elDivTabPane)
+          }
+          elTabContainer.appendChild(elUlTab)
+          elTabContainer.appendChild(elDivTab)
+        } else {
+          window.alert('periode tidak boleh lebih dari 10 tahun')
+        }
+      }
+
+      elAwalPeriode = document.getElementById('awalPeriode')
+      elAkhirPeriode = document.getElementById('akhirPeriode')
+
+      elAwalPeriode.addEventListener('change',generateContentDivKps)
+      elAkhirPeriode.addEventListener('change',generateContentDivKps)
+
+      document.getElementById('jenisKotak').addEventListener('change', function(e){
+        var boxType = e.target.value
+        var elJenisDokumen = document.getElementById('jenisDokumen')
+        elJenisDokumen.textContent = ''
+        elDefaultSelect = document.createElement('option')
+        elDefaultSelect.value = ""
+        elDefaultSelect.textContent = '--Pilih Jenis Dokumen--'
+        elJenisDokumen.appendChild(elDefaultSelect)
+        if (boxType!=='') {
+          elJenisDokumen.disabled = false
+          google.script.run
+            .withSuccessHandler(populateJenisDokumenDropdown)
+            .withFailureHandler(showError)
+            .getDrowpdownJenisDokumenByJenisKotakData(boxType)
+        } else {
+          elJenisDokumen.disabled = true
+        }
+      })
+
+      document.getElementById('jenisDokumen').addEventListener('change', function(e){
+        var jenisKotak = document.getElementById('jenisKotak').value
+        var jenisDokumen = e.target.value
+        var year = new Date().getFullYear()
+        if((jenisKotak!=='')&&(jenisDokumen!=='')){
+          google.script.run
+            .withSuccessHandler(function(data) {
+              if(data!==''){
+                document.getElementById('labelKotak').value = data
+              }
+            })
+            .withFailureHandler(showError)
+            .getBoxLabel(jenisKotak,jenisDokumen,year)
+        } else {
+          document.getElementById('labelKotak').value = ''
+        }
+        generateContentDivKps()
+      })
+
+      document.getElementById('formTambahKotak').addEventListener(
+        'keydown', function(event) {
+          if(event.key==='Enter'){
+            event.preventDefault()
+            return false
+          }
+        }
+      )
+
+      document.getElementById('formTambahKotak').addEventListener('submit', function(e){
+        e.preventDefault()
+        formData = Object.fromEntries(new FormData(e.target).entries())
+        if (formData.jenisDokumen !== 'Consent Letter') {
+          for(let x = parseInt(formData.awalPeriode); x<=parseInt(formData.akhirPeriode); x++){
+            checkBoxes = document.querySelectorAll(`input[name="kps[${x}]"]:checked`)
+            selected = Array.from(checkBoxes).map(cb=>cb.value)
+            formData[`kps[${x}]`] = selected
+          }
+        } else {
+          var selected = []
+          for(let x = parseInt(formData.awalPeriode); x<=parseInt(formData.akhirPeriode); x++){
+            checkBox = document.getElementsByName(`periode[${x}]`)
+            if(checkBox[0].checked){
+              selected.push(checkBox[0].value)  
+            }
+          }
+          formData.periode = selected.join(', ')
+        }
+
+        var areaSelected = []
+        for(var i=0; i<document.getElementById('area').options.length; i++){
+          if(document.getElementById('area').options[i].selected){
+            areaSelected.push(document.getElementById('area').options[i].value)
+          }
+        }
+        formData.area = areaSelected
+
+        // validator mandatory input
+        if(!formData.jenisKotak) {
+          window.alert("Silahkan pilih jenis kotak dahulu!")
+          return
+        }
+
+        if(!formData.jenisDokumen) {
+          window.alert("Silahkan pilih jenis dokumen dahulu!")
+          return
+        }
+
+        if(!formData.gudang) {
+          window.alert("Silahkan pilih gudang dahulu!")
+          return
+        }
+
+        if(!formData.area) {
+          window.alert("Silahkan pilih area dahulu!")
+          return
+        }
+
+        if(!formData.awalPeriode || !formData.akhirPeriode) {
+          window.alert("Minimal pilih satu berkas yang dimasukkan dalam kotak tersebut!")
+          return
+        }
+        
+        google.script.run
+          .withSuccessHandler(function (message) {
+            window.alert(message)
+            document.getElementById('formTambahKotak').reset()
+            document.getElementById('kps').textContent = ''
+          })
+          .withFailureHandler(function (error) {
+            window.alert(error)
+          })
+          .saveDataTambahKotak(formData)
+      })
+    </script>
+  </body>
+</html>

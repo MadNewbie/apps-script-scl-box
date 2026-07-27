@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <base target="_top">
+  </head>
+  <body>
+    <form id="formTambahKotakBaru" class="container">
+        <div class="row">
+          <div class="col-12">
+            <label for="gudang" class="form-label">Gudang:</label>
+            <select class="form-control" id="gudang" name="gudang">
+              <option value="">--Pilih Gudang--</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <label for="jenisKotak" class="form-label">Jenis Kotak:</label>
+            <select id="jenisKotak" name="jenisKotak" class="form-control">
+              <option value="">--Pilih Jenis Kotak--</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <label for="jumlahKotak" class="form-label">Jumlah Kotak:</label>
+            <input type="number" id="jumlahKotak" name="jumlahKotak" class="form-control"/>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-12 text-center">
+            <button class="btn btn-primary btn-md" type="submit">Simpan Data</button>
+          </div>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      google.script.run
+        .withSuccessHandler(populateJenisKotakDropdown)
+        .withFailureHandler(showError)
+        .getDropdownJenisKotakData()
+
+      google.script.run
+        .withSuccessHandler(populateGudangDropdown)
+        .withFailureHandler(showError)
+        .getDropdownGudangData()
+
+      function showError(error) {
+        window.alert(error)
+      }
+
+      function populateGudangDropdown(data) {
+        var el = document.getElementById('gudang')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateJenisKotakDropdown(data) {
+        var el = document.getElementById('jenisKotak')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      document.getElementById('formTambahKotakBaru').addEventListener('submit', function(e) {
+        e.preventDefault()
+
+        var formData = {
+          gudang: document.getElementById('gudang').value,
+          jenisKotak: document.getElementById('jenisKotak').value,
+          jumlahKotak: document.getElementById('jumlahKotak').value
+        }
+
+        // validator mandatory input
+        if (!formData.gudang) {
+          window.alert('Silahkan pilih gudang dahulu!')
+          return
+        }
+
+        if (!formData.jenisKotak) {
+          window.alert('Silahkan pilih jenis kotak dahulu!')
+          return
+        }
+
+        if (!formData.jumlahKotak || formData.jumlahKotak < 0) {
+          window.alert('Jumlah kotak harus berupa angka lebih dari 0')
+          return
+        }
+
+        google.script.run
+          .withSuccessHandler(function(message) {
+            window.alert(message)
+            document.getElementById('formTambahKotakBaru').reset()
+          })
+          .withFailureHandler(function(error) {
+            window.alert(error)
+          })
+          .saveDataTambahKotakBaru(formData)
+      })
+
+      function showMessage(text, type) {
+        var msg = document.getElementById('message')
+        msg.textContent = text
+        msg.className = type
+        msg.style.display = block
+
+        setTimeout(function() {
+          msg.style.display = 'none'
+        }, 3000)
+      }
+    </script>
+  </body>
+</html>
