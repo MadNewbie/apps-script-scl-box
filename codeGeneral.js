@@ -110,10 +110,6 @@ function getBoxLabel(pBoxType,pDocType,pYear) {
   return `${boxType}/${docTypeCode}/${year}/${nextNoYear}`
 }
 
-function getDropdownBoxLabelData(pBoxType, pDocType, pArea) {
-  
-}
-
 function debug() {
   var docType = "Retail"
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()

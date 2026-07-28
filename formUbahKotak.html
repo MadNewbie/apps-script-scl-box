@@ -5,14 +5,14 @@
     <base target="_top">
   </head>
   <body>
-    <form id="formTambahKotak" class="container">
+    <form id="formUbahKotak" class="container">
       <div id="message"></div>
       <div class="row">
         <div class="col-md-6 col-sm-12">
           <div class="row">
             <div class="col-12">
               <label for="jenisKotak" class="form-label">Jenis Kotak:</label>
-              <select id="jenisKotak" name="jenisKotak" class="form-control" disabled>
+              <select id="jenisKotak" name="jenisKotak" class="form-control">
                 <option value="">--Pilih Jenis Kotak--</option>
               </select>
             </div>
@@ -20,7 +20,7 @@
           <div class="row">
             <div class="col-12">
               <label for="jenisDokumen" class="form-label">Jenis Dokumen:</label>
-              <select id="jenisDokumen" class="form-control" name="jenisDokumen" disabled>
+              <select id="jenisDokumen" class="form-control" name="jenisDokumen">
                 <option value="">--Pilih Jenis Dokumen--</option>
               </select>
             </div>
@@ -28,7 +28,7 @@
           <div class="row">
             <div class="col-12">
               <label for="gudang" class="form-label">Gudang:</label>
-              <select id="gudang" name="gudang" class="form-control" disabled>
+              <select id="gudang" name="gudang" class="form-control">
                 <option value="">--Pilih Gudang--</option>
               </select>
             </div>
@@ -58,9 +58,16 @@
           </div>
           <div class="row">
             <div class="col-12">
-              <label for="labelKotak" class="form-label">Label Kotak:</label>
-              <select id="labelKotak" name="labelKotak" class="form-control">
+              <label for="kodeKotak" class="form-label">Kode Kotak:</label>
+              <select id="kodeKotak" name="kodeKotak" class="form-control">
+                <option value="">--Pilih Kode Kotak--</option>
               </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="labelKotak" class="form-label">Label Kotak:</label>
+              <input id="labelKotak" name="labelKotak" class="form-control" readonly/>
             </div>
           </div>
         </div>
@@ -69,11 +76,11 @@
       <div class="row">
         <div class="col-md-6 col-12">
           <label for="dokumenLain" class="form-label">Dokumen Lain:</label>
-          <textarea name="dokumenLain" class="form-control"></textarea>
+          <textarea name="dokumenLain" class="form-control" id="dokumenLain"></textarea>
         </div>
         <div class="col-md-6 col-12">
           <label for="catatan" class="form-label">Catatan:</label>
-          <textarea name="catatan" class="form-control"></textarea>
+          <textarea name="catatan" class="form-control" id="catatan"></textarea>
         </div>
       </div>
       <div class="row my-4">
@@ -128,6 +135,16 @@
 
       function showError(error) {
         window.alert(error)
+      }
+
+      function populateKodeKotakDropdown(data) {
+        var el = document.getElementById('kodeKotak')
+        for( const [key,value] of Object.entries(data)) {
+          var option = document.createElement('option')
+          option.value = key
+          option.textContent = `${key}-${value}`
+          el.appendChild(option)
+        }
       }
 
       function populateJenisKotakDropdown(data) {
@@ -185,6 +202,7 @@
         var akhirPeriode = document.getElementById('akhirPeriode').value
         var elDivRow = document.createElement('div')
         var elTabContainer = document.getElementById('kps')
+        elTabContainer.textContent = ''
         elDivRow.className = 'row'
         for (var x=parseInt(awalPeriode); x<=parseInt(akhirPeriode); x++) {
           var elDivCol3 = document.createElement('div')
@@ -322,7 +340,57 @@
           window.alert('periode tidak boleh lebih dari 10 tahun')
         }
       }
+    
+      function handlerChangeDataByLabelKotak(data) {
+        var elArea = document.getElementById('area')
+        var elNote = document.getElementById('catatan')
+        var elOtherDoc = document.getElementById('dokumenLain')
+        var elStartPeriode = document.getElementById('awalPeriode')
+        var elEndPeriode = document.getElementById('akhirPeriode')
+        var {typeDoc, area, note, otherDoc, periode} = data
+        
+        elNote.value = ''
+        elNote.value = note
 
+        elOtherDoc.value = ''
+        elOtherDoc.value = otherDoc
+
+        Array.from(elArea.options).forEach(option => {
+          option.selected = area.includes(option.value)
+        })
+        elArea.removeAttribute('disabled')
+
+        if (typeDoc!=="Consent Letter") {
+          elStartPeriode.value = Object.keys(periode[0])
+          elEndPeriode.value = Object.keys(periode[periode.length - 1])
+          elStartPeriode.removeAttribute('disabled')
+          elEndPeriode.removeAttribute('disabled')
+          generateTabYear()
+  
+          periode.forEach(data => {
+            var key = Object.keys(data)[0]
+            var values = Object.values(data)[0]
+            values.forEach(value => {
+              elCbKps = document.getElementById(`kps[${key}]${value}Checkbox`)
+              elCbKps.checked = true
+            })
+          })
+        } else {
+          elStartPeriode.value = periode[0]
+          elEndPeriode.value = periode[periode.length - 1]
+          elStartPeriode.removeAttribute('disabled')
+          elEndPeriode.removeAttribute('disabled')
+          generatePeriodeCheckbox()
+
+          periode.forEach(data => {
+            elCbPeriode = document.getElementById(`periode[${data}]`)
+            elCbPeriode.checked = true
+          })
+        }
+      }
+    </script>
+    
+    <script>
       elAwalPeriode = document.getElementById('awalPeriode')
       elAkhirPeriode = document.getElementById('akhirPeriode')
 
@@ -346,10 +414,41 @@
         } else {
           elJenisDokumen.disabled = true
         }
+
+        if ((jenisKotak !== '') && (jenisDokumen!=='') && (gudang!=='')) {
+          document.getElementById('kodeKotak').textContent = ''
+          elDefaultSelect = document.createElement('option')
+          elDefaultSelect.value = ""
+          elDefaultSelect.textContent = '--Pilih Kode Kotak--'
+          document.getElementById('kodeKotak').appendChild(elDefaultSelect)
+          google.script.run
+            .withSuccessHandler(populateKodeKotakDropdown)
+            .withFailureHandler(showError)
+            .getKodeKotak(jenisKotak, jenisDokumen, gudang)
+        }
+      })
+
+      document.getElementById('gudang').addEventListener('change', function(e){
+        var gudang = e.target.value
+        var jenisKotak = document.getElementById('jenisKotak').value
+        var jenisDokumen = document.getElementById('jenisDokumen').value
+        if ((jenisKotak !== '') && (jenisDokumen!=='') && (gudang!=='')) {
+          document.getElementById('kodeKotak').textContent = ''
+          elDefaultSelect = document.createElement('option')
+          elDefaultSelect.value = ""
+          elDefaultSelect.textContent = '--Pilih Kode Kotak--'
+          document.getElementById('kodeKotak').appendChild(elDefaultSelect)
+          google.script.run
+            .withSuccessHandler(populateKodeKotakDropdown)
+            .withFailureHandler(showError)
+            .getKodeKotak(jenisKotak, jenisDokumen, gudang)
+        }
       })
 
       document.getElementById('jenisDokumen').addEventListener('change', function(e){
         var jenisKotak = document.getElementById('jenisKotak').value
+        var gudang = document.getElementById('gudang').value
+        var labelKotak = document.getElementById('labelKotak').value
         var jenisDokumen = e.target.value
         var year = new Date().getFullYear()
         if((jenisKotak!=='')&&(jenisDokumen!=='')){
@@ -364,11 +463,33 @@
         } else {
           document.getElementById('labelKotak').value = ''
         }
+
+        if ((jenisKotak !== '') && (jenisDokumen!=='') && (gudang!=='')) {
+          document.getElementById('kodeKotak').textContent = ''
+          elDefaultSelect = document.createElement('option')
+          elDefaultSelect.value = ""
+          elDefaultSelect.textContent = '--Pilih Kode Kotak--'
+          document.getElementById('kodeKotak').appendChild(elDefaultSelect)
+          google.script.run
+            .withSuccessHandler(populateKodeKotakDropdown)
+            .withFailureHandler(showError)
+            .getKodeKotak(jenisKotak, jenisDokumen, gudang)
+        }
+
         generateContentDivKps()
       })
 
-      document.getElementById('formTambahKotak').addEventListener(
-        'keydown', function(event) {
+      document.getElementById('kodeKotak').addEventListener('change', function(e){
+        var kodeKotak = e.target.options[e.target.selectedIndex].textContent.split("-")[0]
+        var labelKotak = e.target.options[e.target.selectedIndex].textContent.split("-")[1]
+        document.getElementById('labelKotak').value = labelKotak
+        google.script.run
+          .withSuccessHandler(handlerChangeDataByLabelKotak)
+          .withFailureHandler(showError)
+          .getAreaPeriodeNoteOther(kodeKotak)
+      })
+
+      document.getElementById('formUbahKotak').addEventListener('keydown', function(event) {
           if(event.key==='Enter'){
             event.preventDefault()
             return false
@@ -376,7 +497,7 @@
         }
       )
 
-      document.getElementById('formTambahKotak').addEventListener('submit', function(e){
+      document.getElementById('formUbahKotak').addEventListener('submit', function(e){
         e.preventDefault()
         formData = Object.fromEntries(new FormData(e.target).entries())
         if (formData.jenisDokumen !== 'Consent Letter') {
@@ -439,7 +560,7 @@
           .withFailureHandler(function (error) {
             window.alert(error)
           })
-          .saveDataTambahKotak(formData)
+          .updateDataKotak(formData)
       })
     </script>
   </body>
