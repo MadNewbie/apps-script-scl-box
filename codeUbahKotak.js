@@ -98,16 +98,16 @@ function updateDataKotak(formData) {
   return 'Berhasil mengubah data'
 }
 
-function debug() {
-  var pKodeKotak = 'SCL.2'
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetKotak = spreadsheet.getSheetByName('Kotak')
-  var lrKotak = sheetKotak.getLastRow()
-  var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues()
-  var filteredData = dataRow.filter((data)=>{return data[0]===pKodeKotak})[0]
-  var area = filteredData[5].split(", ")
-  var note = filteredData[9]
-  var otherDoc = filteredData[10]
-  var periode = processedPeriode(filteredData[6], filteredData[2])
-  var res = {area,note,otherDoc,periode}
-}
+// function debug() {
+//   var pKodeKotak = 'SCL.2'
+//   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+//   var sheetKotak = spreadsheet.getSheetByName('Kotak')
+//   var lrKotak = sheetKotak.getLastRow()
+//   var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues()
+//   var filteredData = dataRow.filter((data)=>{return data[0]===pKodeKotak})[0]
+//   var area = filteredData[5].split(", ")
+//   var note = filteredData[9]
+//   var otherDoc = filteredData[10]
+//   var periode = processedPeriode(filteredData[6], filteredData[2])
+//   var res = {area,note,otherDoc,periode}
+// }
