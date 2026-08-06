@@ -5,12 +5,12 @@ function showPinjamKotakAntarGudang() {
     .setHeight(750)
 
     SpreadsheetApp.getUi()
-      .showModalDialog(formPinjamKotakAntarGudang, 'Form Pinjam Kotak Antar Gudang')
+      .showModalDialog(formPinjamKotakAntarGudang, 'Form Transfer Kotak Antar Gudang')
 }
 
 function saveDataPinjamKotakAntarGudang(idKotakDipinjam, tujuanPeminjaman, gudangTujuan) {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetPinjamKotak = spreadsheet.getSheetByName('Riwayat Pinjam Kotak Antar Gudang')
+  var sheetPinjamKotak = spreadsheet.getSheetByName('Riwayat Transfer Antar Gudang')
   var lrPinjamKotak = sheetPinjamKotak.getLastRow()
 
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
@@ -25,11 +25,9 @@ function saveDataPinjamKotakAntarGudang(idKotakDipinjam, tujuanPeminjaman, gudan
     sheetPinjamKotak.getRange(lrPinjamKotak+1,2).setValue(tujuanPeminjaman)
     sheetPinjamKotak.getRange(lrPinjamKotak+1,3).setValue(sheetKotak.getRange(dataRow,8).getValue())
     sheetPinjamKotak.getRange(lrPinjamKotak+1,4).setValue(gudangTujuan)
-    sheetPinjamKotak.getRange(lrPinjamKotak+1,5).setValue('FALSE')
-    sheetPinjamKotak.getRange(lrPinjamKotak+1,6).setValue(user)
-    sheetPinjamKotak.getRange(lrPinjamKotak+1,7).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
+    sheetPinjamKotak.getRange(lrPinjamKotak+1,5).setValue(user)
+    sheetPinjamKotak.getRange(lrPinjamKotak+1,6).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
     sheetKotak.getRange(dataRow,8).setValue(gudangTujuan)
-    sheetKotak.getRange(dataRow,9).setValue('Dipinjam')
     lrPinjamKotak = lrPinjamKotak + 1
   });
 
