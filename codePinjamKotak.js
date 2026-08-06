@@ -1,8 +1,8 @@
 function showPinjamKotakForm() {
 	var formPinjamKotak = HtmlService
 		.createHtmlOutputFromFile('formPinjamKotak')
-		.setHeight(1750)
-		.setWidth(2000)
+		.setHeight(750)
+		.setWidth(1000)
 
 	SpreadsheetApp.getUi()
 		.showModalDialog(formPinjamKotak, 'Form Pinjam Kotak')
@@ -37,6 +37,7 @@ function saveDataPinjamKotak(idKotakDipinjam, tujuanPeminjaman) {
     sheetPinjamKotak.getRange(lrPinjamKotak+1,4).setValue('FALSE')
     sheetPinjamKotak.getRange(lrPinjamKotak+1,5).setValue(user)
     sheetPinjamKotak.getRange(lrPinjamKotak+1,6).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
+    lrPinjamKotak = lrPinjamKotak + 1
   });
 
   return 'Berhasil mencatat peminjaman kotak'

@@ -11,9 +11,17 @@
         <div class="col-md-6 col-sm-12">
           <div class="row">
             <div class="col-12">
-              <label for="gudang" class="form-label">Gudang: </label>
-              <select name="gudang" id="gudang" class="form-control">
-                <option value="">--Pilih Gudang--</option>
+              <label for="gudangAsal" class="form-label">Gudang Asal: </label>
+              <select name="gudangAsal" id="gudangAsal" class="form-control">
+                <option value="">--Pilih Gudang Asal--</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="gudangTujuan" class="form-label">Gudang Tujuan: </label>
+              <select name="gudangTujuan" id="gudangTujuan" class="form-control">
+                <option value="">--Pilih Gudang Tujuan--</option>
               </select>
             </div>
           </div>
@@ -76,12 +84,14 @@
       }
 
       function populateGudangDropdown(data) {
-        var el = document.getElementById('gudang')
+        var elGudangAsal = document.getElementById('gudangAsal')
+        var elGudangTujuan = document.getElementById('gudangTujuan')
         data.forEach(function(item) {
           var option = document.createElement('option')
           option.value = item
           option.textContent = item
-          el.appendChild(option)
+          elGudangAsal.appendChild(option.cloneNode(true))
+          elGudangTujuan.appendChild(option.cloneNode(true))
         })
       }
     
@@ -91,13 +101,14 @@
       
       function listenerGudangAndJenisDokumen() {
         const jenisDokumen = document.getElementById('jenisDokumen').value
-        const gudang = document.getElementById('gudang').value
+        const gudangAsal = document.getElementById('gudangAsal').value
+        const gudangTujuan = document.getElementById('gudangTujuan').value
 
-        if (jenisDokumen!='' && gudang!='') {
+        if (jenisDokumen!='' && gudangAsal!='') {
           google.script.run
             .withSuccessHandler(populateDataKotak)
             .withFailureHandler(showError)
-            .getAvailDataKotak(jenisDokumen, gudang)
+            .getAvailDataKotak(jenisDokumen, gudangAsal)
         }
       }
 
@@ -112,13 +123,15 @@
         })
       }
 
-      document.getElementById('gudang').addEventListener('change', listenerGudangAndJenisDokumen)
+      document.getElementById('gudangAsal').addEventListener('change', listenerGudangAndJenisDokumen)
+      document.getElementById('gudangTujuan').addEventListener('change', listenerGudangAndJenisDokumen)
       document.getElementById('jenisDokumen').addEventListener('change', listenerGudangAndJenisDokumen)
 
       document.getElementById('formPinjamKotak').addEventListener('submit', function(e) {
         e.preventDefault()
         formData = Object.fromEntries(new FormData(e.target).entries())
         
+        var gudangTujuan = document.getElementById('gudangTujuan').value
         var tujuanPeminjaman = document.getElementById('tujuanPeminjaman').value
         var dataKotakSelected = []
 
@@ -142,7 +155,7 @@
           .withFailureHandler(function (error) {
             window.alert(error)
           })
-          .saveDataPinjamKotak(dataKotakSelected, tujuanPeminjaman)
+          .saveDataPinjamKotakAntarGudang(dataKotakSelected, tujuanPeminjaman, gudangTujuan)
       })
       
     </script>
