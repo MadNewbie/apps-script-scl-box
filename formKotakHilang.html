@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <base target="_top">
+  </head>
+  <body>
+    <form id="formKotakHilang" class="container">
+      <div id="message"></div>
+      <div class="row">
+        <div class="col-md-6 col sm-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="gudang" class="form-label">Gudang: </label>
+              <select name="gudang" id="gudang" class="form-control">
+                <option value="">--Pilih Gudang--</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="kronologiHilang" class="form-label">Kronologi Singkat Hilang: </label>
+              <input name="kronologiHilang" id="kronologiHilang" type="text" class="form-control" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row my-2">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="dataKotak" class="form-label">Data kotak yang tersedia untuk dipinjam</label>
+              <select name="dataKotak" id="dataKotak" class="form-control" multiple>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row my-4">
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-md btn-primary">Simpan</button>
+        </div>
+      </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      google.script.run
+        .withSuccessHandler(populateGudangDropdown)
+        .withFailureHandler(showError)
+        .getDropdownGudangData()
+
+      function populateGudangDropdown(data) {
+        var el = document.getElementById('gudang')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+    
+      function showError(error) {
+        window.alert(error)
+      }
+      
+      function listenerGudang() {
+        const gudang = document.getElementById('gudang').value
+
+        if (gudang!='') {
+          google.script.run
+            .withSuccessHandler(populateDataKotak)
+            .withFailureHandler(showError)
+            .getAvailDataKotakHilang(gudang)
+        }
+      }
+
+      function populateDataKotak(data) {
+        var elDataKotak = document.getElementById('dataKotak')
+        elDataKotak.textContent = ''
+        data.forEach(function(kotak) {
+          var elOption = document.createElement('option')
+          elOption.value = kotak[0]
+          elOption.text = `${kotak[4]} - ${kotak[5]} (${kotak[6]})`
+          elDataKotak.appendChild(elOption)
+        })
+      }
+
+      document.getElementById('gudang').addEventListener('change', listenerGudang)
+
+      document.getElementById('formKotakHilang').addEventListener('submit', function(e) {
+        e.preventDefault()
+        formData = Object.fromEntries(new FormData(e.target).entries())
+        
+        var kronologiHilang = document.getElementById('kronologiHilang').value
+        var dataKotakSelected = []
+
+        if (kronologiHilang === '') {
+          window.alert('Kronologi hilang harus diisi')
+          return
+        }
+
+        for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
+          if(document.getElementById('dataKotak').options[i].selected){
+            dataKotakSelected.push(document.getElementById('dataKotak').options[i].value)
+          }
+        }
+
+        google.script.run
+          .withSuccessHandler(function (message) {
+            window.alert(message)
+            document.getElementById('formKotakHilang').reset()
+            document.getElementById('dataKotak').textContent = ''
+          })
+          .withFailureHandler(function (error) {
+            window.alert(error)
+          })
+          .saveDataKotakHilang(dataKotakSelected, kronologiHilang)
+      })
+      
+    </script>
+  </body>
+</html>
