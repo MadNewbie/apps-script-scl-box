@@ -13,7 +13,7 @@ function getAvailDataKotakHilang(gudang) {
 	var sheetKotak = spreadsheet.getSheetByName('Kotak')
 	var lrKotak = sheetKotak.getLastRow()
 	var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues()
-	var filteredData = dataRow.filter((data)=>{return (data[7]===gudang && data[8]!=='Hilang')})
+	var filteredData = dataRow.filter((data)=>{return (data[7]===gudang && data[8]!=='Hilang' && data[8]!=='Rusak')})
 	return filteredData
 }
 
