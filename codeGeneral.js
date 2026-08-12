@@ -118,6 +118,10 @@ function generateFileAndGetUrl(pNameFile){
 
   sheet.copyTo(newFile)
 
+  SpreadsheetApp.flush();
+
+  Utilities.sleep(1000);
+
   var defSheet = newFile.getSheetByName('Sheet1')
   if (defSheet) {
     newFile.deleteSheet(defSheet)
@@ -146,6 +150,40 @@ function cleanupFileAndSheet(data) {
     }
   } catch (error) {
     Logger.log(`Error while clearing up sheet: ${error.message}`)
+  }
+}
+
+function generateAndCleanupExcel(pNamefile) {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  var sheetToExport = spreadsheet.getSheetByName('Report Template')
+  var newFile = SpreadsheetApp.create(pNamefile)
+  var newFileId = newFile.getId()
+
+  sheetToExport.copyTo(newFile)
+
+  SpreadsheetApp.flush();
+
+  Utilities.sleep(1000);
+
+  var url = `https://docs.google.com/spreadsheets/d/${newFileId}/export?format=xlsx`
+  var token = ScriptApp.getOAuthToken()
+  var response = UrlFetchApp.fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+
+
+  var folder = DriveApp.getFileById(spreadsheet.getId()).getParents().next()
+  var blob = response.getBlob().setName(`${pNamefile}.xlsx`)
+  var file = folder.createFile(blob)
+
+  DriveApp.getFileById(newFile.getId()).setTrashed(true)
+
+  sheetToExport.clear()
+
+  return {
+    downloadUrl: file.getUrl()
   }
 }
 
