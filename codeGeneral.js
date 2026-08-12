@@ -110,12 +110,51 @@ function getBoxLabel(pBoxType,pDocType,pYear) {
   return `${boxType}/${docTypeCode}/${year}/${nextNoYear}`
 }
 
-function debug() {
-  var docType = "Retail"
+function generateFileAndGetUrl(pNameFile){
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheet = spreadsheet.getSheetByName('Master Jenis Dokumen')
-  var lr = sheet.getLastRow()
-  var masterDocTypeData = sheet.getRange(1,1,lr,2).getValues()
-  var rowIndexSelected = masterDocTypeData.findIndex(x=>x[0]===docType)
-  console.log(sheet.getRange(rowIndexSelected+1,2).getValue())
+  var sheet = spreadsheet.getSheetByName('Report Template')
+  var newFile = SpreadsheetApp.create(pNameFile)
+  var newFileId = newFile.getId()
+
+  sheet.copyTo(newFile)
+
+  var defSheet = newFile.getSheetByName('Sheet1')
+  if (defSheet) {
+    newFile.deleteSheet(defSheet)
+  }
+
+  var downloadUrl = `https://docs.google.com/spreadsheets/d/${newFileId}/export?format=xlsx&id=${newFileId}`
+
+  return {
+    downloadUrl: downloadUrl,
+    newFileId: newFileId
+  }
 }
+
+function cleanupFileAndSheet(data) {
+  try {
+    DriveApp.getFileById(data.newFileId).setTrashed(true)
+  } catch (error) {
+    Logger.log(`Error while deleting drive file: ${error.message}`)
+  }
+
+  try {
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    var sheet = spreadsheet.getSheetByName('Report Template')
+    if (sheet && spreadsheet.getSheets().length > 1){
+      sheet.clear()
+    }
+  } catch (error) {
+    Logger.log(`Error while clearing up sheet: ${error.message}`)
+  }
+}
+
+// function debug() {
+//   var docType = "Retail"
+//   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+//   var sheet = spreadsheet.getSheetByName('Master Jenis Dokumen')
+//   var lr = sheet.getLastRow()
+//   var masterDocTypeData = sheet.getRange(1,1,lr,2).getValues()
+//   var rowIndexSelected = masterDocTypeData.findIndex(x=>x[0]===docType)
+//   console.log(sheet.getRange(rowIndexSelected+1,2).getValue())
+// }
