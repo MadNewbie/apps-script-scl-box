@@ -24,6 +24,7 @@ function printLabelBox(idCetakKotak) {
   var sheetTemplate = spreadsheet.getSheetByName('Report Template')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var lrKotak = sheetKotak.getLastRow()
+  sheetTemplate.clear()
 
   //generate header
   sheetTemplate.getRange(1,1).setValue('Filling No')
@@ -44,6 +45,6 @@ function printLabelBox(idCetakKotak) {
     cr = cr + 1
   });
 
-  var dataFile = generateFileAndGetUrl('Template Label Kotak SCL')
-  return dataFile
+  var dataFile = generateAndSendLink('Template Label Kotak SCL')
+  return 'File yang telah selesai diproses akan dikirimkan melalui email. Silahkan menunggu beberapa menit. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }

@@ -187,6 +187,77 @@ function generateAndCleanupExcel(pNamefile) {
   }
 }
 
+function generateAndSendLink(pNameFile) {
+  // generate file
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  var sheet = spreadsheet.getSheetByName('Report Template')
+  var newFile = SpreadsheetApp.create(pNameFile)
+  var newFileId = newFile.getId()
+  
+  const tresholdFile = 15*60*1000
+  
+  sheet.copyTo(newFile)
+
+  var defSheet = newFile.getSheetByName('Sheet1')
+  if (defSheet) {
+    newFile.deleteSheet(defSheet)
+  }
+
+  ScriptApp.newTrigger('deleteSentFile')
+    .timeBased()
+    .after(tresholdFile)
+    .create()
+  
+  PropertiesService.getScriptProperties().setProperties({'FILE_TO_DELETE': newFileId})
+
+  SpreadsheetApp.flush()
+
+  //sent email
+  var email = Session.getActiveUser().getEmail()
+
+  try {
+    var newFileUrl = newFile.getUrl()
+
+    var subject = `Your Google Drive Link: ${pNameFile}`
+    var htmlBody = `
+      <p>Halo,</p>
+      <p>Anda telah meminta untuk membuatkan laporan dan berikut adalah tautan laporan yang anda minta:</p><br>
+      <p><a href="${newFileUrl}">${pNameFile}</a></p>
+      <br>
+      <p>Harap segera unduh file tersebut, karena sistem hanya menyimpannya dalam waktu kurang lebih 15 menit dari email ini diterima.</p>
+      <br>
+      <br>
+      <p>Semoga hari anda menyenangkan,<br>Sistem Otomatis</p>
+    `
+
+    MailApp.sendEmail({
+      to: email,
+      subject: subject,
+      htmlBody: htmlBody
+    })
+
+    console.log(`Email berhasil terkirim ke ${user}`)
+  } catch (error) {
+    console.log(`Error terjadi ketika menjalankan script: ${error.toString()}`)
+  }
+}
+
+function deleteSentFile() {
+  const scriptProperties = PropertiesService.getScriptProperties()
+  const fileId = scriptProperties.getProperty('FILE_TO_DELETE')
+
+  if (fileId) {
+    try {
+      DriveApp.getFileById(fileId).setTrashed(true)
+      Logger.log(`Successfully moved file ${fileId} to trash`)
+    } catch (error) {
+      Logger.log(`Error while deleting file: ${error.message}`)
+    }  finally {
+      scriptProperties.deleteProperty('FILE_TO_DELETE')
+    }
+  }
+}
+
 // function debug() {
 //   var docType = "Retail"
 //   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()

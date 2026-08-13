@@ -3,6 +3,64 @@
   <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <base target="_top">
+    <style>
+      /* Base button styles */
+      .loading-btn {
+        position: relative;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .loading-btn:disabled {
+        background-color: #a0cfff;
+        cursor: not-allowed;
+      }
+
+      /* Spinner hidden by default */
+      .loading-btn::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        border: 4px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      /* Loading state styles */
+      .loading-btn.loading .btn-text {
+        visibility: hidden; /* Hides text but keeps button size */
+        opacity: 0;
+      }
+
+      .loading-btn.loading::after {
+        opacity: 1;
+        animation: button-loading-spinner 1s ease infinite;
+      }
+
+      /* Rotation animation */
+      @keyframes button-loading-spinner {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
     <form class="container" id="formCetakLabel">
@@ -32,7 +90,7 @@
       </div>
       <div class="row my-4">
         <div class="col-12 text-end">
-          <button type="submit" class="btn btn-md btn-primary">Simpan</button>
+          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmitCetakLabel"><span class="btn-text">Siapkan Data</span></button>
         </div>
       </div>
     </form>
@@ -91,23 +149,13 @@
           }
         }
 
+        document.getElementById('btnSubmitCetakLabel').classList.add('loading')
+        document.getElementById('btnSubmitCetakLabel').disabled = true
+
         google.script.run
           .withFailureHandler((error)=>showError(error))
           .withSuccessHandler(function (res) {
-            if (res.downloadUrl) {
-              const downloadLink = document.createElement('a')
-              downloadLink.href = res.downloadUrl
-              downloadLink.target = '_blank'
-              downloadLink.click()
-
-              setTimeout(function() {
-                google.script.run
-                  .withSuccessHandler((response)=>{google.script.host.close()})
-                  .cleanupFileAndSheet(res)
-              },2000)
-            } else {
-              showError("File tidak berhasil terbentuk")
-            }
+            window.alert(res)
           })
           .printLabelBox(dataKotakSelected)
 
