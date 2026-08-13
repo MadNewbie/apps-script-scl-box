@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <base target="_top">
+  </head>
+  <body>
+    <form id="formCariData">
+      <div id="message"></div>
+      <div class="row">
+        <div class="col-md-4 col-sm-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="area" class="form-label">Area: </label>
+              <select name="area" id="area" class="form-control">
+                <option value="">--Pilih Area--</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="row">
+            <div class="col-12">
+              <label for="jenisDokumen" class="form-label">Jenis Dokumen: </label>
+              <select name="jenisDokumen" id="jenisDokumen" class="form-control">
+                <option value="">--Pilih Jenis Dokumen--</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="row">
+            <div class="col-6">
+              <label for="kps" class="form-label">KPS: </label>
+              <select name="kps" id="kps" class="form-control">
+                <option value="">--Pilih KPS--</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label for="periode" class="form-label">Periode: </label>
+              <select name="periode" id="periode" class="form-control">
+                <option value="">--Pilih Periode--</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row m-4">
+        <table id="resultTable" class="table table-striped table-bordered">
+          <thead>
+            <th>Label Kotak</th>
+            <th>Gudang</th>
+            <th>Jenis Dokumen</th>
+            <th>Dokumen Lain</th>
+          </thead>
+          <tbody id="resultBodyTable"></tbody>
+        </table>
+      </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      google.script.run
+        .withSuccessHandler(populateAreaDropdown)
+        .withFailureHandler(showError)
+        .getDropdownAreaData()
+
+      google.script.run
+        .withSuccessHandler(populateJenisDokumenDropdown)
+        .withFailureHandler(showError)
+        .getDropdownJenisDokumenData()
+
+      function populateAreaDropdown(data) {
+        var el = document.getElementById('area')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateJenisDokumenDropdown(data) {
+        var el = document.getElementById('jenisDokumen')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+
+      function populateKpsDropdown() {
+        var el = document.getElementById('kps')
+        for(var i = 1; i<=52; i++) {
+          var option = document.createElement('option')
+          option.value = i
+          option.textContent = i
+          el.appendChild(option)
+        }
+      }
+
+      function populatePeriodeDropdown() {
+        var el = document.getElementById('periode')
+        var yearNow = new Date().getFullYear()
+        for(var i = 2024; i<=yearNow; i++) {
+          var option = document.createElement('option')
+          option.value = i
+          option.textContent = i
+          el.appendChild(option)
+        }
+      }
+      
+      function showError(error) {
+        window.alert(error)
+      }
+
+      function renderTableBody(data) {
+        console.log(data)
+        elTableBody = document.getElementById('resultBodyTable')
+        elTableBody.textContent = ''
+        //render hasil
+        data.forEach((item) => {
+          var elBodyRow = document.createElement('tr')
+          // console.log(elBodyRow)
+          var elsChildTr = []
+          var elDataLabelKotak = document.createElement('td')
+          elDataLabelKotak.textContent = item[4]
+          var elDataGudang = document.createElement('td')
+          elDataGudang.textContent = item[7]
+          var elDataJenisDokumen = document.createElement('td')
+          elDataJenisDokumen.textContent = item[2]
+          var elDataDokumenLain = document.createElement('td')
+          elDataDokumenLain.textContent = item[10]
+          elBodyRow.appendChild(elDataLabelKotak)
+          elBodyRow.appendChild(elDataGudang)
+          elBodyRow.appendChild(elDataJenisDokumen)
+          elBodyRow.appendChild(elDataDokumenLain)
+          elTableBody.appendChild(elBodyRow)
+        })
+      }
+
+      function getSearchDataByParam() {
+        var area = document.getElementById('area').value
+        var jenisDokumen = document.getElementById('jenisDokumen').value
+        var kps = document.getElementById('kps').value
+        var periode = document.getElementById('periode').value
+
+        google.script.run
+          .withSuccessHandler(renderTableBody)
+          .withFailureHandler(showError)
+          .getSearchDataByParam(area, jenisDokumen, kps, periode)
+      }
+
+      document.addEventListener('DOMContentLoaded',function(){
+        populateKpsDropdown()
+        populatePeriodeDropdown()
+      })
+
+      document.getElementById('area').addEventListener('change', getSearchDataByParam)
+      document.getElementById('jenisDokumen').addEventListener('change', getSearchDataByParam)
+      document.getElementById('kps').addEventListener('change', getSearchDataByParam)
+      document.getElementById('periode').addEventListener('change', getSearchDataByParam)
+    </script>
+  </body>
+</html>

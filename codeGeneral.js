@@ -161,9 +161,9 @@ function generateAndCleanupExcel(pNamefile) {
 
   sheetToExport.copyTo(newFile)
 
-  SpreadsheetApp.flush();
+  SpreadsheetApp.flush()
 
-  Utilities.sleep(1000);
+  Utilities.sleep(1000)
 
   var url = `https://docs.google.com/spreadsheets/d/${newFileId}/export?format=xlsx`
   var token = ScriptApp.getOAuthToken()

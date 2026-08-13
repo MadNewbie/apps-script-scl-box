@@ -27,7 +27,7 @@ function formatKps(data){
     }
     while (y<=data.length) {
       if(data[y+1]!=data[y]+1){
-        kpsWithDash.push(`${data[x]}-${data[y]}`)
+        kpsWithDash.push(`${data[x]} - ${data[y]}`)
         if(y+1<=data.length){
           x=y+1
         }
