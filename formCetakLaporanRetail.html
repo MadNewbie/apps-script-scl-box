@@ -63,26 +63,15 @@
     </style>
   </head>
   <body>
-    <form class="container" id="formCetakLabel">
+    <form class="container" id="formCetakLaporanRetail">
       <div id="message"></div>
       <div class="row">
         <div class="col-md-6 col-sm-12">
           <div class="row">
             <div class="col-12">
-              <label for="gudang" class="form-label">Gudang: </label>
-              <select name="gudang" id="gudang" class="form-control">
-                <option value="">--Pilih Gudang--</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row my-2">
-        <div class="col-md-12">
-          <div class="row">
-            <div class="col-12">
-              <label for="dataKotak" class="form-label">Data kotak yang bisa dicetak</label>
-              <select name="dataKotak" id="dataKotak" class="form-control" multiple>
+              <label for="periode" class="form-label">Periode: </label>
+              <select name="periode" id="periode" class="form-control">
+                <option value="">--Pilih Periode--</option>
               </select>
             </div>
           </div>
@@ -90,76 +79,52 @@
       </div>
       <div class="row my-4">
         <div class="col-12 text-end">
-          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmitCetakLabel"><span class="btn-text">Siapkan Data</span></button>
+          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmitCetakLaporanRetail"><span class="btn-text">Siapkan Data</span></button>
         </div>
       </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-      google.script.run
-        .withSuccessHandler(populateGudangDropdown)
-        .withFailureHandler(showError)
-        .getDropdownGudangData()
 
-      function populateGudangDropdown(data) {
-        var el = document.getElementById('gudang')
-        data.forEach(function(item) {
+      function populatePeriodeDropdown() {
+        var el = document.getElementById('periode')
+        var yearNow = new Date().getFullYear()
+        for(var i = 2024; i<=yearNow; i++) {
           var option = document.createElement('option')
-          option.value = item
-          option.textContent = item
+          option.value = i
+          option.textContent = i
           el.appendChild(option)
-        })
+        }
       }
       
       function showError(error) {
         window.alert(error)
       }
 
-      function listenerGudang() {
-        const gudang = document.getElementById('gudang').value
+      document.addEventListener('DOMContentLoaded',function(){
+        populatePeriodeDropdown()
+      })
 
-        if (gudang!='') {
-          google.script.run
-            .withSuccessHandler(populateDataKotak)
-            .withFailureHandler(showError)
-            .getAvailDataCetakKotak(gudang)
-        }
-      }
-
-      function populateDataKotak(data) {
-        var elDataKotak = document.getElementById('dataKotak')
-        elDataKotak.textContent = ''
-        data.forEach(function(kotak) {
-          var elOption = document.createElement('option')
-          elOption.value = kotak[0]
-          elOption.text = `${kotak[4]} - ${kotak[5]} (${kotak[6]})`
-          elDataKotak.appendChild(elOption)
-        })
-      }
-
-      document.getElementById('gudang').addEventListener('change', listenerGudang)
-
-      document.getElementById('formCetakLabel').addEventListener('submit', function (e) {
+      document.getElementById('formCetakLaporanRetail').addEventListener('submit', function (e) {
         e.preventDefault()
-        var dataKotakSelected = []
+        var formData = Object.fromEntries(new FormData(e.target).entries())
 
-        for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
-          if(document.getElementById('dataKotak').options[i].selected){
-            dataKotakSelected.push(document.getElementById('dataKotak').options[i].value)
-          }
+        if(!formData.periode) {
+          window.alert("Silahkan pilih periode dahulu!")
+          return
         }
 
-        document.getElementById('btnSubmitCetakLabel').classList.add('loading')
-        document.getElementById('btnSubmitCetakLabel').disabled = true
+        document.getElementById('btnSubmitCetakLaporanRetail').classList.add('loading')
+        document.getElementById('btnSubmitCetakLaporanRetail').disabled = true
 
         google.script.run
           .withFailureHandler((error)=>showError(error))
           .withSuccessHandler(function (res) {
-            document.getElementById('btnSubmitCetakLabel').disabled = false
-            document.getElementById('btnSubmitCetakLabel').classList.remove('loading')
+            document.getElementById('btnSubmitCetakLaporanRetail').disabled = false
+            document.getElementById('btnSubmitCetakLaporanRetail').classList.remove('loading')
             window.alert(res)
           })
-          .printLabelBox(dataKotakSelected)
+          .printReportRetail(formData)
 
         // google.script.run
         //   .withSuccessHandler(function(result) {

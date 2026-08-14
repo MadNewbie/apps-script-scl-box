@@ -46,5 +46,5 @@ function printLabelBox(idCetakKotak) {
   });
 
   var dataFile = generateAndSendLink('Template Label Kotak SCL')
-  return 'File yang telah selesai diproses akan dikirimkan melalui email. Silahkan menunggu beberapa menit. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }

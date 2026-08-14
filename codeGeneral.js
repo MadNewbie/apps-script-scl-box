@@ -196,7 +196,9 @@ function generateAndSendLink(pNameFile) {
   
   const tresholdFile = 15*60*1000
   
-  sheet.copyTo(newFile)
+  var copiedSheet = sheet.copyTo(newFile)
+
+  copiedSheet.setName(pNameFile)
 
   var defSheet = newFile.getSheetByName('Sheet1')
   if (defSheet) {
@@ -258,12 +260,59 @@ function deleteSentFile() {
   }
 }
 
-// function debug() {
-//   var docType = "Retail"
-//   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-//   var sheet = spreadsheet.getSheetByName('Master Jenis Dokumen')
-//   var lr = sheet.getLastRow()
-//   var masterDocTypeData = sheet.getRange(1,1,lr,2).getValues()
-//   var rowIndexSelected = masterDocTypeData.findIndex(x=>x[0]===docType)
-//   console.log(sheet.getRange(rowIndexSelected+1,2).getValue())
-// }
+function getAllDataAsObject() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  var sheetKotak = spreadsheet.getSheetByName('Kotak')
+  var lrKotak = sheetKotak.getLastRow()
+  var res = []
+
+  for (var i = 2; i<=lrKotak; i++) {
+    var modelBox = {}
+    modelBox['kodeKotak'] = sheetKotak.getRange(i,1).getValue()
+    modelBox['jenisKotak'] = sheetKotak.getRange(i,2).getValue()
+    modelBox['jenisDokumen'] = sheetKotak.getRange(i,3).getValue()
+    modelBox['nomorKotak'] = sheetKotak.getRange(i,4).getValue()
+    modelBox['labelKotak'] = sheetKotak.getRange(i,5).getValue()
+    modelBox['area'] = sheetKotak.getRange(i,6).getValue().split(', ')
+    modelBox['periode'] = getPeriodeKpsDataAsObject(sheetKotak.getRange(i,7).getValue())
+    modelBox['lokasi'] = sheetKotak.getRange(i,8).getValue()
+    modelBox['status'] = sheetKotak.getRange(i,9).getValue()
+    modelBox['catatan'] = sheetKotak.getRange(i,10).getValue()
+    modelBox['dokumenLain'] = sheetKotak.getRange(i,11).getValue()
+    res.push(modelBox)
+  }
+
+  return res
+}
+
+function getPeriodeKpsDataAsObject(stringData) {
+  var res = []
+  var firstFormattedData = stringData.split(';')
+  firstFormattedData.forEach((data) => {
+    var indexOfKurBuk = data.indexOf('(')
+    var indexOfKurTup = data.indexOf(')')
+    var periode = parseInt(data.substring(indexOfKurBuk+1, indexOfKurTup))
+    var kpsString = data.substring(4, indexOfKurBuk - 1)
+    var kpsStringScnd = kpsString.split(', ')
+    var dataKpsArr = []
+    kpsStringScnd.forEach((insideData) => {
+      var kpsStringThrd = insideData.split('-')
+      if(kpsStringThrd.length > 1){
+        var first = parseInt(kpsStringThrd[0])
+        var last = parseInt(kpsStringThrd[1])
+        for (var i=first; i<=last; i++) {
+          dataKpsArr.push(i)
+        }
+      } else {
+        dataKpsArr.push(kpsStringThrd)
+      }
+    })
+    res.push({[periode]: dataKpsArr})
+  })
+  return res
+}
+
+function debug() {
+  var kotak = getAllDataAsObject()
+  console.log(kotak)
+}
