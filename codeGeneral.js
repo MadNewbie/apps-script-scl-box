@@ -304,7 +304,7 @@ function getPeriodeKpsDataAsObject(stringData) {
           dataKpsArr.push(i)
         }
       } else {
-        dataKpsArr.push(kpsStringThrd)
+        dataKpsArr.push(parseInt(kpsStringThrd[0]))
       }
     })
     res.push({[periode]: dataKpsArr})
@@ -312,7 +312,7 @@ function getPeriodeKpsDataAsObject(stringData) {
   return res
 }
 
-function debug() {
-  var kotak = getAllDataAsObject()
-  console.log(kotak)
-}
+// function debug() {
+//   var kotak = getAllDataAsObject()
+//   console.log(kotak)
+// }
