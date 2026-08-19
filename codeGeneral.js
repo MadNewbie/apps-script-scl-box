@@ -199,6 +199,7 @@ function generateAndSendLink(pNameFile) {
   var copiedSheet = sheet.copyTo(newFile)
 
   copiedSheet.setName(pNameFile)
+  copiedSheet.showSheet()
 
   var defSheet = newFile.getSheetByName('Sheet1')
   if (defSheet) {
