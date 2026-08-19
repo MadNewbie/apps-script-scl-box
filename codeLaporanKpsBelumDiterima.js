@@ -105,5 +105,5 @@ function printReportKpsNotReceive(formData) {
 
 	// console.log(res)
   generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`)
-	return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }
