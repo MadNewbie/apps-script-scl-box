@@ -1,4 +1,4 @@
-function showPinjamKotakAntarGudang() {
+function showPinjamKotakAntarGudangSementara() {
   var formPinjamKotakAntarGudangSementara = HtmlService
     .createHtmlOutputFromFile('formPinjamKotakAntarGudangSementara')
     .setWidth(1000)
