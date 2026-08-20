@@ -14,6 +14,7 @@ function printReportAmountNumber() {
   sheetGudang = spreadsheet.getSheetByName('Master Gudang')
   sheetJumlahKotak = spreadsheet.getSheetByName('Jumlah Kotak')
   sheetKotak = spreadsheet.getSheetByName('Kotak')
+  sheetKotakBaruHilang = spreadsheet.getSheetByName('Riwayat Kotak Baru Hilang')
 
   //ambil last row
   lrArea = sheetArea.getLastRow()
@@ -22,6 +23,7 @@ function printReportAmountNumber() {
   lrGudang = sheetGudang.getLastRow()
   lrJumlahKotak = sheetJumlahKotak.getLastRow()
   lrKotak = sheetKotak.getLastRow()
+  lrKotakBaruHilang = sheetKotakBaruHilang.getLastRow()
 
   //generate header
   sheetTemplate.getRange(1,1).setValue('Laporan Jumlah Kotak').setFontWeight("bold")
@@ -34,7 +36,8 @@ function printReportAmountNumber() {
   dataJenisKotak = sheetJenisKotak.getRange(1,1,lrJenisKotak,1).getValues().map(data=>data[0]).filter(data => data !== "")
   dataGudang = sheetGudang.getRange(1,1,lrGudang,1).getValues().map(data=>data[0]).filter(data => data !== "")
   dataJumlahKotak = sheetGudang.getRange(2,1,lrJumlahKotak,6).getValues()
-  dataKotak = sheetKotak.getRange(2,1,lrKotak,9).getValues()
+  dataKotak = sheetKotak.getRange(2,1,lrKotak-1,9).getValues()
+  dataKotakBaruHilang = sheetKotakBaruHilang.getRange(2,2,lrKotakBaruHilang-1,3).getValues()
 
   cr = 4
 
@@ -70,6 +73,12 @@ function printReportAmountNumber() {
               summaryByJenisKotak[`${jenisKotak}`]['per_gudang'][gudang]['hilang']++
               break;
           }
+        }
+      })
+
+      dataKotakBaruHilang.forEach(data => {
+        if(data[0]===jenisKotak && data[2]===gudang){
+          summaryByJenisKotak[`${jenisKotak}`]['per_gudang'][gudang]['hilang']+=parseInt(data[1])
         }
       })
     })
