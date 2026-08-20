@@ -63,42 +63,43 @@
     </style>
   </head>
   <body>
-    <form id="formPengembalianKotakSementara" class="container">
+    <form id="formKotakBaruHilang" class="container">
       <div id="message"></div>
       <div class="row">
         <div class="col-md-6 col-sm-12">
           <div class="row">
             <div class="col-12">
-              <label for="gudangAsal" class="form-label">Gudang Asal: </label>
-              <select name="gudangAsal" id="gudangAsal" class="form-control">
-                <option value="">--Pilih Gudang Asal--</option>
+              <label for="jenisKotak" class="form-label">Jenis Kotak: </label>
+              <select name="jenisKotak" id="jenisKotak" class="form-control">
+                <option value="">--Pilih Jenis Kotak--</option>
               </select>
             </div>
           </div>
           <div class="row">
             <div class="col-12">
-              <label for="gudangTujuan" class="form-label">Gudang Tujuan: </label>
-              <select name="gudangTujuan" id="gudangTujuan" class="form-control">
-                <option value="">--Pilih Gudang Tujuan--</option>
+              <label for="gudang" class="form-label">Gudang: </label>
+              <select name="gudang" id="gudang" class="form-control">
+                <option value="">--Pilih Gudang--</option>
               </select>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="row my-2">
-        <div class="col-md-12">
           <div class="row">
             <div class="col-12">
-              <label for="dataKotak" class="form-label">Data kotak yang dipinjam</label>
-              <select name="dataKotak" id="dataKotak" class="form-control" multiple>
-              </select>
+              <label for="jumlahKotak" class="form-label">Jumlah Kotak: </label>
+              <input type="text" name="jumlahKotak" id="jumlahKotak" class="form-control" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="kronologi" class="form-label">Kronologi Singkat: </label>
+              <input type="text" name="kronologi" id="kronologi" class="form-control" />
             </div>
           </div>
         </div>
-      </div>
-      <div class="row my-4">
-        <div class="col-12 text-end">
-          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmit">Simpan</button>
+        <div class="row my-4">
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmit">Simpan</button>
+          </div>
         </div>
       </div>
     </form>
@@ -111,62 +112,57 @@
         .withFailureHandler(showError)
         .getDropdownGudangData()
 
+      google.script.run
+        .withSuccessHandler(populateJenisKotakDropdown)
+        .withFailureHandler(showError)
+        .getDropdownJenisKotakData()
+
       function populateGudangDropdown(data) {
-        var elGudangAsal = document.getElementById('gudangAsal')
-        var elGudangTujuan = document.getElementById('gudangTujuan')
+        var el = document.getElementById('gudang')
         data.forEach(function(item) {
           var option = document.createElement('option')
           option.value = item
           option.textContent = item
-          elGudangAsal.appendChild(option.cloneNode(true))
-          elGudangTujuan.appendChild(option.cloneNode(true))
+          el.appendChild(option)
         })
       }
 
+      function populateJenisKotakDropdown(data) {
+        var el = document.getElementById('jenisKotak')
+        data.forEach(function(item) {
+          var option = document.createElement('option')
+          option.value = item
+          option.textContent = item
+          el.appendChild(option)
+        })
+      }
+    
       function showError(error) {
         window.alert(error)
       }
 
-      function listenerGudang() {
-        const gudangAsal = document.getElementById('gudangAsal').value
-        const gudangTujuan = document.getElementById('gudangTujuan').value
+      document.getElementById('formKotakBaruHilang').addEventListener('submit', function(e) {
+        e.preventDefault()
+        formData = Object.fromEntries(new FormData(e.target).entries())
 
-        if(gudangAsal === gudangTujuan) {
-          window.alert("Gudang tujuan tidak boleh sama dengan gudang asal")
+        if (!formData.jenisKotak) {
+          window.alert("Silahkan pilih jenis kotak dahulu!")
           return
         }
 
-        if (gudangAsal!='' && gudangTujuan!='') {
-          google.script.run
-            .withSuccessHandler(populateDataKotak)
-            .withFailureHandler(showError)
-            .getAvailDataKotakForPengembalianSementara(gudangAsal)
+        if (!formData.gudang) {
+          window.alert("Silahkan pilih gudang dahulu!")
+          return
         }
-      }
 
-      function populateDataKotak(data) {
-        var elDataKotak = document.getElementById('dataKotak')
-        elDataKotak.textContent = ''
-        data.forEach(function(kotak) {
-          var elOption = document.createElement('option')
-          elOption.value = kotak[0]
-          elOption.text = `${kotak[1]}`
-          elDataKotak.appendChild(elOption)
-        })
-      }
+        if (formData.jumlahKotak <= 0) {
+          window.alert("Jumlah kotak harus lebih besar atau sama dengan 0!")
+          return
+        }
 
-      document.getElementById('gudangAsal').addEventListener('change',listenerGudang)
-      document.getElementById('gudangTujuan').addEventListener('change',listenerGudang)
-
-      document.getElementById('formPengembalianKotakSementara').addEventListener('submit', function (e){
-        e.preventDefault()
-        var gudangTujuan = document.getElementById('gudangTujuan').value
-        var kotakSelected = []
-
-        for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
-          if(document.getElementById('dataKotak').options[i].selected){
-            kotakSelected.push(document.getElementById('dataKotak').options[i].value)
-          }
+        if (!formData.kronologi) {
+          window.alert("Kronologi singkat harus diisi!")
+          return
         }
 
         document.getElementById('btnSubmit').classList.add('loading')
@@ -180,12 +176,10 @@
             window.alert(message)
             document.getElementById('btnSubmit').classList.remove('loading')
             document.getElementById('btnSubmit').disabled = false
-            document.getElementById('formPengembalianKotakSementara').reset()
-            document.getElementById('dataKotak').textContent = ''
+            document.getElementById('formKotakBaruHilang').reset()
           })
-          .saveDataPengembalianKotakAntarGudangSementara(kotakSelected, gudangTujuan)
+          .saveDataKotakBaruHilang(formData)
       })
     </script>
-
   </body>
 </html>
