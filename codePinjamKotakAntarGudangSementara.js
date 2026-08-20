@@ -5,7 +5,7 @@ function showPinjamKotakAntarGudang() {
     .setHeight(750)
 
     SpreadsheetApp.getUi()
-      .showModalDialog(formPinjamKotakAntarGudangSementara, 'Form Transfer Kotak Antar Gudang Sementara')
+      .showModalDialog(formPinjamKotakAntarGudangSementara, 'Form Pinjam Kotak Antar Gudang Sementara')
 }
 
 function saveDataPinjamKotakAntarGudangSementara(idKotakDipinjam, tujuanPeminjaman, gudangTujuan) {

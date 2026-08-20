@@ -3,9 +3,67 @@
   <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <base target="_top">
+    <style>
+      /* Base button styles */
+      .loading-btn {
+        position: relative;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .loading-btn:disabled {
+        background-color: #a0cfff;
+        cursor: not-allowed;
+      }
+
+      /* Spinner hidden by default */
+      .loading-btn::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        border: 4px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      /* Loading state styles */
+      .loading-btn.loading .btn-text {
+        visibility: hidden; /* Hides text but keeps button size */
+        opacity: 0;
+      }
+
+      .loading-btn.loading::after {
+        opacity: 1;
+        animation: button-loading-spinner 1s ease infinite;
+      }
+
+      /* Rotation animation */
+      @keyframes button-loading-spinner {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <form id="formPinjamKotakSementara" class="container">
+    <form id="formPengembalianKotakSementara">
       <div id="message"></div>
       <div class="row">
         <div class="col-md-6 col-sm-12">
@@ -25,29 +83,13 @@
               </select>
             </div>
           </div>
-          <div class="row">
-            <div class="col-12">
-              <label for="jenisDokumen" class="form-label">Jenis Dokumen: </label>
-              <select name="jenisDokuemn" id="jenisDokumen" class="form-control">
-                <option value="">--Pilih Jenis Dokumen--</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <div class="row">
-            <div class="col-12">
-              <label for="jenisDokumen" class="form-label">Tujuan Peminjaman: </label>
-              <input name="tujuanPeminjaman" id="tujuanPeminjaman" type="text" class="form-control" />
-            </div>
-          </div>
         </div>
       </div>
       <div class="row my-2">
         <div class="col-md-12">
           <div class="row">
             <div class="col-12">
-              <label for="dataKotak" class="form-label">Data kotak yang tersedia untuk dipinjam</label>
+              <label for="dataKotak" class="form-label">Data kotak yang dipinjam</label>
               <select name="dataKotak" id="dataKotak" class="form-control" multiple>
               </select>
             </div>
@@ -56,7 +98,7 @@
       </div>
       <div class="row my-4">
         <div class="col-12 text-end">
-          <button type="submit" class="btn btn-md btn-primary">Simpan</button>
+          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmit">Simpan</button>
         </div>
       </div>
     </form>
@@ -65,24 +107,9 @@
 
     <script>
       google.script.run
-        .withSuccessHandler(populateJenisDokumenDropdown)
-        .withFailureHandler(showError)
-        .getDropdownJenisDokumenData()
-
-      google.script.run
         .withSuccessHandler(populateGudangDropdown)
         .withFailureHandler(showError)
         .getDropdownGudangData()
-
-      function populateJenisDokumenDropdown(data) {
-        var el = document.getElementById('jenisDokumen')
-        data.forEach(function(item) {
-          var option = document.createElement('option')
-          option.value = item
-          option.textContent = item
-          el.appendChild(option)
-        })
-      }
 
       function populateGudangDropdown(data) {
         var elGudangAsal = document.getElementById('gudangAsal')
@@ -95,21 +122,25 @@
           elGudangTujuan.appendChild(option.cloneNode(true))
         })
       }
-    
+
       function showError(error) {
         window.alert(error)
       }
-      
-      function listenerGudangAndJenisDokumen() {
-        const jenisDokumen = document.getElementById('jenisDokumen').value
+
+      function listenerGudang() {
         const gudangAsal = document.getElementById('gudangAsal').value
         const gudangTujuan = document.getElementById('gudangTujuan').value
 
-        if (jenisDokumen!='' && gudangAsal!='') {
+        if(gudangAsal === gudangTujuan) {
+          window.alert("Gudang tujuan tidak boleh sama dengan gudang asal")
+          return
+        }
+
+        if (gudangAsal!='' && gudangTujuan!='') {
           google.script.run
             .withSuccessHandler(populateDataKotak)
             .withFailureHandler(showError)
-            .getAvailDataKotak(jenisDokumen, gudangAsal)
+            .getAvailDataKotakForPengembalianSementara(gudangAsal)
         }
       }
 
@@ -119,46 +150,42 @@
         data.forEach(function(kotak) {
           var elOption = document.createElement('option')
           elOption.value = kotak[0]
-          elOption.text = `${kotak[4]} - ${kotak[5]} (${kotak[6]})`
+          elOption.text = `${kotak[1]}`
           elDataKotak.appendChild(elOption)
         })
       }
 
-      document.getElementById('gudangAsal').addEventListener('change', listenerGudangAndJenisDokumen)
-      document.getElementById('gudangTujuan').addEventListener('change', listenerGudangAndJenisDokumen)
-      document.getElementById('jenisDokumen').addEventListener('change', listenerGudangAndJenisDokumen)
+      document.getElementById('gudangAsal').addEventListener('change',listenerGudang)
+      document.getElementById('gudangTujuan').addEventListener('change',listenerGudang)
 
-      document.getElementById('formPinjamKotakSementara').addEventListener('submit', function(e) {
+      document.getElementById('formPengembalianKotakSementara').addEventListener('submit', function (e){
         e.preventDefault()
-        formData = Object.fromEntries(new FormData(e.target).entries())
-        
         var gudangTujuan = document.getElementById('gudangTujuan').value
-        var tujuanPeminjaman = document.getElementById('tujuanPeminjaman').value
-        var dataKotakSelected = []
-
-        if (tujuanPeminjaman==='') {
-          window.alert('Tujuan peminjaman harus diisi')
-          return
-        }
+        var kotakSelected = []
 
         for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
           if(document.getElementById('dataKotak').options[i].selected){
-            dataKotakSelected.push(document.getElementById('dataKotak').options[i].value)
+            kotakSelected.push(document.getElementById('dataKotak').options[i].value)
           }
         }
 
+        document.getElementById('btnSubmit').classList.add('loading')
+        document.getElementById('btnSubmit').disabled = true
+
         google.script.run
-          .withSuccessHandler(function (message) {
-            window.alert(message)
-            document.getElementById('formPinjamKotakSementara').reset()
-            document.getElementById('dataKotak').textContent = ''
-          })
-          .withFailureHandler(function (error) {
+          .withFailureHandler((error) => {
             window.alert(error)
           })
-          .saveDataPinjamKotakAntarGudangSementara(dataKotakSelected, tujuanPeminjaman, gudangTujuan)
+          .withSuccessHandler((message) => {
+            window.alert(message)
+            document.getElementById('btnSubmit').classList.remove('loading')
+            document.getElementById('btnSubmit').disabled = false
+            document.getElementById('formPengembalianKotakSementara').reset()
+            document.getElementById('dataKotak').textContent = ''
+          })
+          .saveDataPengembalianKotakAntarGudangSementara(kotakSelected, gudangTujuan)
       })
-      
     </script>
+
   </body>
 </html>
