@@ -139,7 +139,11 @@
 
       function populateKodeKotakDropdown(data) {
         var el = document.getElementById('kodeKotak')
-        for( const [key,value] of Object.entries(data)) {
+        const sorted = Object.keys(data).sort().reduce(function (result,key){
+          result[key]=data[key]
+          return result
+        },{})
+        for( const [key,value] of Object.entries(sorted)) {
           var option = document.createElement('option')
           option.value = key
           option.textContent = `${key}-${value}`
@@ -565,3 +569,4 @@
     </script>
   </body>
 </html>
+  

@@ -66,7 +66,8 @@
       function populateDataKotak(data) {
         var elDataKotak = document.getElementById('dataKotak')
         elDataKotak.textContent = ''
-        data.forEach(function(kotak) {
+        const sorted = data.sort((a,b) => a[0].localeCompare(b[0]))
+        sorted.forEach(function(kotak) {
           var elOption = document.createElement('option')
           elOption.value = kotak[0]
           elOption.text = `${kotak[1]}`
