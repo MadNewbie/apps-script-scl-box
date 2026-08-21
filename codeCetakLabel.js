@@ -1,20 +1,20 @@
 function showCetakLabel() {
   var formCetakLabel = HtmlService
     .createHtmlOutputFromFile('formCetakLabel')
-    .setWidth(1000)
-    .setHeight(750)
+    .setWidth(300)
+    .setHeight(200)
     
   SpreadsheetApp.getUi()
     .showModalDialog(formCetakLabel, 'Form Cetak Label')
 }
 
-function getAvailDataCetakKotak(gudang) {
+function getAvailDataCetakKotak(jenisDokumen) {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
 	var sheetKotak = spreadsheet.getSheetByName('Kotak')
 	var lrKotak = sheetKotak.getLastRow()
 	var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues()
 	var filteredData = dataRow.filter((data)=>{
-    return (data[7]===gudang && data[8]==='Terpakai')
+    return (data[2]===jenisDokumen && data[8]==='Terpakai')
   })
 	return filteredData
 }

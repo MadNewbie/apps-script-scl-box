@@ -1,8 +1,8 @@
 function showCetakLabelRange() {
   var formCetakLabelRange = HtmlService
     .createHtmlOutputFromFile('formCetakLabelRange')
-    .setWidth(1000)
-    .setHeight(750)
+    .setWidth(500)
+    .setHeight(400)
     
   SpreadsheetApp.getUi()
     .showModalDialog(formCetakLabelRange, 'Form Cetak Label')
