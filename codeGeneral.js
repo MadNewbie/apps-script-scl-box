@@ -269,17 +269,22 @@ function getAllDataAsObject() {
 
   for (var i = 2; i<=lrKotak; i++) {
     var modelBox = {}
+    if (sheetKotak.getRange(i,3).getValue()!=='Consent Letter') {
+      modelBox['periode'] = getPeriodeKpsDataAsObject(sheetKotak.getRange(i,7).getValue())
+    } else {
+      modelBox['periode'] = sheetKotak.getRange(i,7).getValue().split(', ')
+    }
     modelBox['kodeKotak'] = sheetKotak.getRange(i,1).getValue()
     modelBox['jenisKotak'] = sheetKotak.getRange(i,2).getValue()
     modelBox['jenisDokumen'] = sheetKotak.getRange(i,3).getValue()
     modelBox['nomorKotak'] = sheetKotak.getRange(i,4).getValue()
     modelBox['labelKotak'] = sheetKotak.getRange(i,5).getValue()
     modelBox['area'] = sheetKotak.getRange(i,6).getValue().split(', ')
-    modelBox['periode'] = getPeriodeKpsDataAsObject(sheetKotak.getRange(i,7).getValue())
     modelBox['lokasi'] = sheetKotak.getRange(i,8).getValue()
     modelBox['status'] = sheetKotak.getRange(i,9).getValue()
     modelBox['catatan'] = sheetKotak.getRange(i,10).getValue()
     modelBox['dokumenLain'] = sheetKotak.getRange(i,11).getValue()
+    modelBox['statusKhusus'] = sheetKotak.getRange(i,12).getValue()
     res.push(modelBox)
   }
 
@@ -311,6 +316,28 @@ function getPeriodeKpsDataAsObject(stringData) {
     res.push({[periode]: dataKpsArr})
   })
   return res
+}
+
+function getKpsDate(kps, periode) {
+  if (periode > 1000) {
+    firstDayOfYear = new Date(periode, 0, 1)
+    firstDayOfWeek = firstDayOfYear.getDay()
+    offset = firstDayOfWeek === 0 ? 0 : firstDayOfWeek
+
+    startDate = new Date(
+      firstDayOfYear.getFullYear(),
+      0,
+      1-offset+1+(kps-1)*7
+    )
+
+    endDate = new Date(startDate)
+    endDate.setDate(startDate.getDate() + 6)
+  }
+
+  return {
+    startDate: startDate,
+    endDate: endDate
+  }
 }
 
 // function debug() {

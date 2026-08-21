@@ -17,31 +17,66 @@ function printReportGudang(gudang) {
   sheetTemplate.clear()
 
     //generate header
-  sheetTemplate.getRange(1,1).setValue('Laporan KPS Retail').setFontWeight('bold')
-  sheetTemplate.getRange(2,1).setValue('Tanggal Cetak').setFontWeight('bold')
-  sheetTemplate.getRange(2,2).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
-  sheetTemplate.getRange(3,1).setValue('Label Kotak').setFontWeight('bold')
-  sheetTemplate.getRange(3,2).setValue('Area').setFontWeight('bold')
-  sheetTemplate.getRange(3,3).setValue('Jenis Dokumen').setFontWeight('bold')
-  sheetTemplate.getRange(3,4).setValue('KPS').setFontWeight('bold')
-  sheetTemplate.getRange(3,5).setValue('Catatan').setFontWeight('bold')
-  sheetTemplate.getRange(3,6).setValue('Status Khusus').setFontWeight('bold')
+  sheetTemplate.getRange(1,1).setValue('Laporan Per Gudang').setFontWeight('bold')
+  sheetTemplate.getRange(2,1).setValue('Gudang').setFontWeight('bold')
+  sheetTemplate.getRange(2,2).setValue(gudang)
+  sheetTemplate.getRange(3,1).setValue('Tanggal Cetak').setFontWeight('bold')
+  sheetTemplate.getRange(3,2).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
+  sheetTemplate.getRange(5,1).setValue('Label Kotak').setFontWeight('bold')
+  sheetTemplate.getRange(5,2).setValue('Area').setFontWeight('bold')
+  sheetTemplate.getRange(5,3).setValue('Jenis Dokumen').setFontWeight('bold')
+  sheetTemplate.getRange(5,4).setValue('KPS').setFontWeight('bold')
+  sheetTemplate.getRange(5,5).setValue('Periode').setFontWeight('bold')
+  sheetTemplate.getRange(5,6).setValue('Tanggal Mulai').setFontWeight('bold')
+  sheetTemplate.getRange(5,7).setValue('Tanggal Akhir').setFontWeight('bold')
+  sheetTemplate.getRange(5,8).setValue('Catatan').setFontWeight('bold')
+  sheetTemplate.getRange(5,9).setValue('Status Khusus').setFontWeight('bold')
 
-  cr = 4
+  cr = 6
 
-  sheetKotak.getRange(2,1,lrSheetKotak-1,12).getValues().filter((kotak) => {
-    return kotak[7]===gudang && kotak[8]==='Terpakai'
-  }).forEach(kotak => {
-    console.log(kotak)
-    sheetTemplate.getRange(cr,1).setValue(kotak[4])
-    sheetTemplate.getRange(cr,2).setValue(kotak[5])
-    sheetTemplate.getRange(cr,3).setValue(kotak[2])
-    sheetTemplate.getRange(cr,4).setValue(kotak[6])
-    sheetTemplate.getRange(cr,5).setValue(kotak[10])
-    sheetTemplate.getRange(cr,6).setValue(kotak[11])
-    cr++
+  var objKotak = getAllDataAsObject()
+  // console.log(objKotak)
+  var filtered = objKotak.filter((kotak) => {
+    // console.log(kotak)
+    return kotak.lokasi === gudang && kotak.status==='Terpakai'
+  })
+  filtered.forEach(kotak => {
+    for (const periode of kotak.periode) {
+      if (kotak.jenisDokumen !== 'Consent Letter') {
+        const periodeDiKotak = Object.keys(periode)[0]
+        const kpsDiKotak = Object.values(periode)[0]
+        // console.log(kpsDiKotak)
+        kpsDiKotak.forEach(kps => {
+          var kpsDate = getKpsDate(parseInt(kps),parseInt(periodeDiKotak))
+          sheetTemplate.getRange(cr,1).setValue(kotak.labelKotak)
+          sheetTemplate.getRange(cr,2).setValue(kotak.area.join(', '))
+          sheetTemplate.getRange(cr,3).setValue(kotak.jenisDokumen)
+          sheetTemplate.getRange(cr,4).setValue(kps)
+          sheetTemplate.getRange(cr,5).setValue(periodeDiKotak)
+          sheetTemplate.getRange(cr,6).setValue(kpsDate.startDate)
+          sheetTemplate.getRange(cr,7).setValue(kpsDate.endDate)
+          sheetTemplate.getRange(cr,8).setValue(kotak.catatan)
+          sheetTemplate.getRange(cr,9).setValue(kotak.statusKhusus)
+          cr++
+        })
+      } else {
+        sheetTemplate.getRange(cr,1).setValue(kotak.labelKotak)
+        sheetTemplate.getRange(cr,2).setValue(kotak.area.join(', '))
+        sheetTemplate.getRange(cr,3).setValue(kotak.jenisDokumen)
+        sheetTemplate.getRange(cr,4).setValue('-')
+        sheetTemplate.getRange(cr,5).setValue(periode)
+        // sheetTemplate.getRange(cr,6).setValue(Utilities(kpsDate.startDate,"Asia/Bangkok", "dd MMMM yyyy"))
+        // sheetTemplate.getRange(cr,7).setValue(Utilities(kpsDate.endDate,"Asia/Bangkok", "dd MMMM yyyy"))
+        sheetTemplate.getRange(cr,8).setValue(kotak.catatan)
+        sheetTemplate.getRange(cr,9).setValue(kotak.statusKhusus)
+        cr++
+      }
+    }
+    // sheetTemplate.getRange(cr,4).setValue(kotak.periode)
+    // sheetTemplate.getRange(cr,7).setValue(kotak[10])
+    // sheetTemplate.getRange(cr,8).setValue(kotak[11])
   })
 
-  var dataFile = generateAndSendLink(`Laporan Data Gudang Per Tanggal - ${Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy")}`)
+  // var dataFile = generateAndSendLink(`Laporan Data Gudang Per Tanggal - ${Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy")}`)
   return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }
