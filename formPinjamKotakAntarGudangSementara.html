@@ -116,7 +116,30 @@
       function populateDataKotak(data) {
         var elDataKotak = document.getElementById('dataKotak')
         elDataKotak.textContent = ''
-        const sorted = data.sort((a,b) => a[0].localeCompare(b[0]))
+        const sorted = data.sort((a,b) => {
+          const valA = a[4]
+          const valB = b[4]
+
+          const[aTypeBox, aTypeDoc, aYear, aNo] = valA.split('/')
+          const[bTypeBox, bTypeDoc, bYear, bNo] = valB.split('/')
+
+          const compTypeBox = aTypeBox.localeCompare(bTypeBox)
+          const compTypeDoc = aTypeDoc.localeCompare(bTypeDoc)
+
+          if (compTypeBox!==0){
+            return compTypeBox
+          }
+
+          if (compTypeDoc!==0) {
+            return compTypeDoc
+          }
+
+          if (aYear - bYear !== 0) {
+            return aYear - bYear
+          }
+
+          return parseInt(aNo) - parseInt(bNo)
+        })
         sorted.forEach(function(kotak) {
           var elOption = document.createElement('option')
           elOption.value = kotak[0]

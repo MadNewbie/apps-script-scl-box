@@ -197,14 +197,37 @@
 
       function populateKodeKotakDropdown(data) {
         var el = document.getElementById('kodeKotak')
-        const sorted = Object.keys(data).sort().reduce(function (result,key){
+        const sorted = Object.keys(data).sort((a,b) => {
+          const valA = data[a]
+          const valB = data[b]
+
+          const[aTypeBox, aTypeDoc, aYear, aNo] = valA.split('/')
+          const[bTypeBox, bTypeDoc, bYear, bNo] = valB.split('/')
+
+          const compTypeBox = aTypeBox.localeCompare(bTypeBox)
+          const compTypeDoc = aTypeDoc.localeCompare(bTypeDoc)
+
+          if (compTypeBox!==0){
+            return compTypeBox
+          }
+
+          if (compTypeDoc!==0) {
+            return compTypeDoc
+          }
+
+          if (aYear - bYear !== 0) {
+            return aYear - bYear
+          }
+
+          return parseInt(aNo) - parseInt(bNo)
+        }).reduce(function (result,key){
           result[key]=data[key]
           return result
         },{})
         for( const [key,value] of Object.entries(sorted)) {
           var option = document.createElement('option')
           option.value = key
-          option.textContent = `${key}-${value}`
+          option.textContent = `${value}`
           el.appendChild(option)
         }
       }
