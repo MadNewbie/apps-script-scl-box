@@ -63,10 +63,10 @@
     </style>
   </head>
   <body>
-    <form id="formKotakRusak" class="container">
+    <form class="container" id="formCetakLabel">
       <div id="message"></div>
       <div class="row">
-        <div class="col-md-6 col sm-12">
+        <div class="col-md-6 col-sm-12">
           <div class="row">
             <div class="col-12">
               <label for="gudang" class="form-label">Gudang: </label>
@@ -77,18 +77,17 @@
           </div>
           <div class="row">
             <div class="col-12">
-              <label for="kronologiHilang" class="form-label">Kronologi Singkat Rusak: </label>
-              <input name="kronologiHilang" id="kronologiRusak" type="text" class="form-control" />
+              <label for="labelKotakAwal" class="form-label">Label Kotak Awal: </label>
+              <select name="labelKotakAwal" id="labelKotakAwal" class="form-control">
+                <option value="">--Pilih Label Kotak Acuan Awal--</option>
+              </select>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="row my-2">
-        <div class="col-md-12">
           <div class="row">
             <div class="col-12">
-              <label for="dataKotak" class="form-label">Data kotak yang tersedia</label>
-              <select name="dataKotak" id="dataKotak" class="form-control" multiple size="16">
+              <label for="labelKotakAkhir" class="form-label">Label Kotak Akhir: </label>
+              <select name="labelKotakAkhir" id="labelKotakAkhir" class="form-control">
+                <option value="">--Pilih Label Kotak Acuan Akhir--</option>
               </select>
             </div>
           </div>
@@ -96,11 +95,10 @@
       </div>
       <div class="row my-4">
         <div class="col-12 text-end">
-          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmit">Simpan</button>
+          <button type="submit" class="btn btn-md btn-primary loading-btn" id="btnSubmitCetakLabel"><span class="btn-text">Siapkan Data</span></button>
         </div>
       </div>
     </form>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
       google.script.run
@@ -117,26 +115,50 @@
           el.appendChild(option)
         })
       }
-    
+      
       function showError(error) {
         window.alert(error)
       }
-      
+
       function listenerGudang() {
         const gudang = document.getElementById('gudang').value
 
         if (gudang!='') {
           google.script.run
-            .withSuccessHandler(populateDataKotak)
+            .withSuccessHandler(populateLabelKotakAcuan)
             .withFailureHandler(showError)
-            .getAvailDataKotakRusak(gudang)
+            .getAvailDataCetakKotak(gudang)
         }
+      }
+
+      function populateLabelKotakAcuan(data) {
+        var elLabelKotakAwal = document.getElementById('labelKotakAwal')
+        var elLabelKotakAkhir = document.getElementById('labelKotakAkhir')
+        elLabelKotakAwal.textContent = ''
+        elLabelKotakAkhir.textContent = ''
+        var defOptAwal = document.createElement('option')
+        defOptAwal.value = ''
+        defOptAwal.textContent = '--Pilih Label Kotak Acuan Awal--'
+        elLabelKotakAwal.appendChild(defOptAwal)
+        var defOptAkhir = document.createElement('option')
+        defOptAkhir.value = ''
+        defOptAkhir.textContent = '--Pilih Label Kotak Acuan Awal--'
+        elLabelKotakAkhir.appendChild(defOptAkhir)
+        const sorted = data.sort()
+        sorted.forEach(function(kotak) {
+          var elOption = document.createElement('option')
+          elOption.value = kotak[4]
+          elOption.text = `${kotak[4]} - ${kotak[5]} (${kotak[6]})`
+          elLabelKotakAwal.appendChild(elOption.cloneNode(true))
+          elLabelKotakAkhir.appendChild(elOption.cloneNode(true))
+        })
       }
 
       function populateDataKotak(data) {
         var elDataKotak = document.getElementById('dataKotak')
         elDataKotak.textContent = ''
-        data.forEach(function(kotak) {
+        const sorted = data.sort()
+        sorted.forEach(function(kotak) {
           var elOption = document.createElement('option')
           elOption.value = kotak[0]
           elOption.text = `${kotak[4]} - ${kotak[5]} (${kotak[6]})`
@@ -146,41 +168,60 @@
 
       document.getElementById('gudang').addEventListener('change', listenerGudang)
 
-      document.getElementById('formKotakRusak').addEventListener('submit', function(e) {
+      document.getElementById('formCetakLabel').addEventListener('submit', function (e) {
         e.preventDefault()
-        formData = Object.fromEntries(new FormData(e.target).entries())
-        
-        var kronologiRusak = document.getElementById('kronologiRusak').value
         var dataKotakSelected = []
 
-        if (kronologiRusak === '') {
-          window.alert('Kronologi rusak harus diisi')
+        // for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
+        //   if(document.getElementById('dataKotak').options[i].selected){
+        //     dataKotakSelected.push(document.getElementById('dataKotak').options[i].value)
+        //   }
+        // }
+
+        const labelAwal = document.getElementById('labelKotakAwal').value
+        var [awalBoxType, awalDocType, awalYear, awalNo] = labelAwal.split('/')
+        const labelAkhir = document.getElementById('labelKotakAkhir').value
+        var [akhirBoxType, akhirDocType, akhirYear, akhirNo] = labelAkhir.split('/')
+
+        if (awalBoxType!==akhirBoxType) {
+          window.alert('Tipe kotak tidak sama')
           return
         }
 
-        for(var i=0; i<document.getElementById('dataKotak').options.length; i++){
-          if(document.getElementById('dataKotak').options[i].selected){
-            dataKotakSelected.push(document.getElementById('dataKotak').options[i].value)
-          }
+        if (awalDocType!==akhirDocType) {
+          window.alert('Tipe dokumen tidak sama')
+          return
         }
 
-        document.getElementById('btnSubmit').disabled = true
-        document.getElementById('btnSubmit').classList.add('loading')
+        if (awalYear!==akhirYear) {
+          window.alert('Harus berada dalam satu tahun')
+          return
+        }
+
+        document.getElementById('btnSubmitCetakLabel').classList.add('loading')
+        document.getElementById('btnSubmitCetakLabel').disabled = true
 
         google.script.run
-          .withSuccessHandler(function (message) {
-            window.alert(message)
-            document.getElementById('btnSubmit').classList.remove('loading')
-            document.getElementById('btnSubmit').disabled = false
-            document.getElementById('formKotakRusak').reset()
-            document.getElementById('dataKotak').textContent = ''
+          .withFailureHandler((error)=>showError(error))
+          .withSuccessHandler(function (res) {
+            document.getElementById('btnSubmitCetakLabel').disabled = false
+            document.getElementById('btnSubmitCetakLabel').classList.remove('loading')
+            window.alert(res)
           })
-          .withFailureHandler(function (error) {
-            window.alert(error)
-          })
-          .saveDataKotakRusak(dataKotakSelected, kronologiRusak)
+          .printLabelBoxRange(labelAwal, labelAkhir)
+
+        // google.script.run
+        //   .withSuccessHandler(function(result) {
+        //     const downloadLink = document.createElement('a')
+        //     downloadLink.href = result.downloadUrl
+        //     downloadLink.target = '_blank'
+        //     downloadLink.click()
+
+        //     google.script.host.close()
+        //   })
+        //   .generateAndCleanupExcel('Template Label Kotak SCL')
+
       })
-      
     </script>
   </body>
 </html>
