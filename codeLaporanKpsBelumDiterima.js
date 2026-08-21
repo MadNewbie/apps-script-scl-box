@@ -86,8 +86,8 @@ function printReportKpsNotReceive(formData) {
 		})
 	})
 
-	// console.log('setelah for each kotak yg difilter')
-  // console.log(res)
+	console.log('setelah for each kotak yg difilter')
+  console.log(res)
 
 	cr = 5
 	// res.forEach((data)=>{
@@ -104,6 +104,6 @@ function printReportKpsNotReceive(formData) {
   }
 
 	// console.log(res)
-  generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`)
+  // generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`)
   return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }

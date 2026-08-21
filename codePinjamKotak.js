@@ -30,7 +30,7 @@ function saveDataPinjamKotak(idKotakDipinjam, tujuanPeminjaman) {
 
   idKotakDipinjam.forEach(id => {
     var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues().findIndex((data)=>{return data[0]===id}) + 2
-    sheetKotak.getRange(dataRow,9).setValue('Dipinjam')
+    sheetKotak.getRange(dataRow,12).setValue('Dipinjam')
     sheetPinjamKotak.getRange(lrPinjamKotak+1,1).setValue(sheetKotak.getRange(dataRow,1).getValue())
     sheetPinjamKotak.getRange(lrPinjamKotak+1,2).setValue(sheetKotak.getRange(dataRow,5).getValue())
     sheetPinjamKotak.getRange(lrPinjamKotak+1,3).setValue(tujuanPeminjaman)

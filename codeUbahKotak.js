@@ -12,8 +12,8 @@ function getKodeKotak(pJenisKotak,pJenisDokumen,pGudang) {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var lrKotak = sheetKotak.getLastRow()
-  var resFilteredKodeLabelKotak = Object.fromEntries(sheetKotak.getRange(2,1,lrKotak-1,8).getValues().filter(function(data){
-    return data[1]===pJenisKotak && data[2]===pJenisDokumen && data[7]===pGudang
+  var resFilteredKodeLabelKotak = Object.fromEntries(sheetKotak.getRange(2,1,lrKotak-1,9).getValues().filter(function(data){
+    return data[1]===pJenisKotak && data[2]===pJenisDokumen && data[7]===pGudang && data[8] === 'Terpakai'
   }).map((data)=>[data[0],data[4]]))
   return resFilteredKodeLabelKotak
 }
