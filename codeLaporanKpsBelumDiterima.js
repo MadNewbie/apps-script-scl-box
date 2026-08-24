@@ -102,8 +102,8 @@ function printReportKpsNotReceive(formData) {
       sheetTemplate.getRange(cr,1).setValue(area)
       sheetTemplate.getRange(cr,2).setValue(docType)
       sheetTemplate.getRange(cr,3).setValue(kps)
-      sheetTemplate.getRange(cr,4).setValue(kpsDate.startDate)
-      sheetTemplate.getRange(cr,5).setValue(kpsDate.endDate)
+      sheetTemplate.getRange(cr,4).setValue(kpsDate.startDate).setNumberFormat("dd-MMM-yyyy")
+      sheetTemplate.getRange(cr,5).setValue(kpsDate.endDate).setNumberFormat("dd-MMM-yyyy")
       cr++
     });
   }

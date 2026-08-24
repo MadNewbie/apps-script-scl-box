@@ -53,8 +53,8 @@ function printReportGudang(gudang) {
           sheetTemplate.getRange(cr,3).setValue(kotak.jenisDokumen)
           sheetTemplate.getRange(cr,4).setValue(kps)
           sheetTemplate.getRange(cr,5).setValue(periodeDiKotak)
-          sheetTemplate.getRange(cr,6).setValue(kpsDate.startDate)
-          sheetTemplate.getRange(cr,7).setValue(kpsDate.endDate)
+          sheetTemplate.getRange(cr,6).setValue(kpsDate.startDate).setNumberFormat("dd-MMM-yyyy")
+          sheetTemplate.getRange(cr,7).setValue(kpsDate.endDate).setNumberFormat("dd-MMM-yyyy")
           sheetTemplate.getRange(cr,8).setValue(kotak.catatan)
           sheetTemplate.getRange(cr,9).setValue(kotak.statusKhusus)
           cr++
