@@ -27,9 +27,11 @@ function printReportKpsNotReceive(formData) {
   sheetTemplate.getRange(3,1).setValue('Tanggal Cetak')
   sheetTemplate.getRange(3,2).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
 	sheetTemplate.getRange(4,1).setValue('Area')
-	sheetTemplate.getRange(4,2).setValue('Jenis Dokumen')
-	sheetTemplate.getRange(4,3).setValue('Periode')
-	sheetTemplate.getRange(4,4).setValue('KPS')
+  sheetTemplate.getRange(4,2).setValue('Jenis Dokumen')
+	sheetTemplate.getRange(4,3).setValue('KPS')
+	sheetTemplate.getRange(4,4).setValue('Tanggal Awal')
+  sheetTemplate.getRange(4,5).setValue('Tanggal Akhir')
+  sheetTemplate.getRange(4,6).setValue('Keterangan')
 
 	cr = 4
 
@@ -43,14 +45,8 @@ function printReportKpsNotReceive(formData) {
 
 	//membuat model default data
 	for(var i=0;i<dataArea.length;i++){
-		sheetTemplate.getRange(cr+i+1,1).setValue(dataArea[i])
-		sheetTemplate.getRange(cr+i+2,1).setValue(dataArea[i])
-		sheetTemplate.getRange(cr+i+1,2).setValue('Retail')
-		sheetTemplate.getRange(cr+i+2,2).setValue('Non Retail')
-		sheetTemplate.getRange(cr+i+1,3).setValue(periode)
-		sheetTemplate.getRange(cr+i+2,3).setValue(periode)
-		res[`${dataArea[i]} Retail`] = defKps
-		res[`${dataArea[i]} Non Retail`] = defKps
+		res[`${dataArea[i]}-Retail`] = defKps
+		res[`${dataArea[i]}-Non Retail`] = defKps
 		cr++
 	}
 
@@ -59,15 +55,18 @@ function printReportKpsNotReceive(formData) {
 		var result = false
 		kotak.periode.forEach(element => {
 			var boxPeriode = Object.keys(element)[0]
-      		result = result || (parseInt(periode)===parseInt(boxPeriode) && kotak.status==='Terpakai')
+      console.log(kotak.labelKotak)
+      console.log(kotak.jenisDokumen)
+      result = result || (parseInt(periode)===parseInt(boxPeriode) && kotak.status==='Terpakai' && kotak.jenisDokumen !== 'Consent Letter')
 		});
 		return result
 	})
-	// console.log('sebelum for each kotak yg difilter')
-	// console.log(res)
+	console.log('sebelum for each kotak yg difilter')
+	console.log(res)
 	// menghapus kps yg terdapat dalam filtered kotak
 	filteredKotak.forEach((data)=>{
-		// console.log(data)
+		console.log(data.labelKotak)
+    console.log(data.jenisDokumen)
 		data.area.forEach((area) => {
 			var boxArea = area
 			data.periode.filter((dataInside) => {
@@ -79,9 +78,9 @@ function printReportKpsNotReceive(formData) {
         // console.log(boxKps)
         // console.log(res[`${boxArea} ${data.jenisDokumen}`])
         // console.log(res[resKey])
-				var excludedKps = res[`${boxArea} ${data.jenisDokumen}`].filter((el)=>!boxKps.includes(el))
+				var excludedKps = res[`${boxArea}-${data.jenisDokumen}`].filter((el)=>!boxKps.includes(el))
         // console.log(excludedKps)
-        res[`${boxArea} ${data.jenisDokumen}`] = excludedKps
+        res[`${boxArea}-${data.jenisDokumen}`] = excludedKps
 			})
 		})
 	})
@@ -96,11 +95,17 @@ function printReportKpsNotReceive(formData) {
 	// })
   for (const key in res) {
     if (!Object.hasOwn(res, key)) continue;
-    
+    const [area, docType] = key.split('-')
     const element = res[key];
-    sheetTemplate.getRange(cr,4).setValue(element.join(', '))
-		cr++
-    
+    element.forEach(kps => {
+      const kpsDate = getKpsDate(kps, periode)
+      sheetTemplate.getRange(cr,1).setValue(area)
+      sheetTemplate.getRange(cr,2).setValue(docType)
+      sheetTemplate.getRange(cr,3).setValue(kps)
+      sheetTemplate.getRange(cr,4).setValue(kpsDate.startDate)
+      sheetTemplate.getRange(cr,5).setValue(kpsDate.endDate)
+      cr++
+    });
   }
 
 	// console.log(res)
