@@ -565,9 +565,8 @@
       })
 
       document.getElementById('kodeKotak').addEventListener('change', function(e){
-        var kodeKotak = e.target.options[e.target.selectedIndex].textContent.split("-")[0]
-        var labelKotak = e.target.options[e.target.selectedIndex].textContent.split("-")[1]
-        document.getElementById('labelKotak').value = labelKotak
+        var kodeKotak = e.target.options[e.target.selectedIndex].value
+        document.getElementById('labelKotak').value = e.target.options[e.target.selectedIndex].textContent
         google.script.run
           .withSuccessHandler(handlerChangeDataByLabelKotak)
           .withFailureHandler(showError)
