@@ -1,6 +1,17 @@
-function printReportAmountNumber() {
+function clickBtnGenerateReportAmount() {
+  ScriptApp.newTrigger('printReportAmountNumber')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  window.alert('File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)')
+}
+
+function printReportAmountNumber(e) {
+  console.log('fungsi print Report Jumlah Kotak ditrigger')
+
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Box')
   sheetTemplate.clear()
   var date = new Date()
   var summaryByJenisKotak = {}
@@ -304,6 +315,12 @@ function printReportAmountNumber() {
     cc+=addPointCol+2
   })
 
-  generateAndSendLink(`Laporan jumlah kotak`)
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  generateAndSendLink(`Laporan jumlah kotak`, 'Template Box')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }

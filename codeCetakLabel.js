@@ -19,9 +19,40 @@ function getAvailDataCetakKotak(jenisDokumen) {
 	return filteredData
 }
 
-function printLabelBox(idCetakKotak) {
+function clickBtnGenerateLabel(idCetakKotak) {
+  const params = {
+    idCetakKotak: idCetakKotak
+  }
+
+  PropertiesService.getUserProperties().setProperty('paramTriggerLabel', JSON.stringify(params))
+
+  ScriptApp.newTrigger('printLabelBox')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  return 'File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+}
+
+function printLabelBox(e) {
+
+  console.log('fungsi print Label ditrigger')
+
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerLabel')
+
+  var params
+
+  if (savedProperties) {
+    params = JSON.parse(savedProperties)
+  } else {
+    Logger.log('trigger tidak memiliki parameter')
+    return
+  }
+
+  var idCetakKotak = params.idCetakKotak
+
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Label')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var lrKotak = sheetKotak.getLastRow()
   sheetTemplate.clear()
@@ -45,6 +76,14 @@ function printLabelBox(idCetakKotak) {
     cr = cr + 1
   });
 
-  var dataFile = generateAndSendLink('Template Label Kotak SCL')
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  var dataFile = generateAndSendLink('Template Label Kotak SCL', 'Template Label')
+  PropertiesService.getUserProperties().deleteProperty('paramTriggerLabel')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+
 }

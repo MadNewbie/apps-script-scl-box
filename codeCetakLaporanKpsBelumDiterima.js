@@ -8,10 +8,37 @@ function showCetakLaporanKpsBelumDiterima() {
     .showModalDialog(formCetakLaporanKpsBelumDiterima, 'Form Cetak Laporan KPS Belum Diterima')
 }
 
-function printReportKpsNotReceive(formData) {
-  var periode = formData.periode
+function clickBtnGenerateReportNotRecieve(formData) {
+  const params = {
+    periode: formData.periode
+  }
+  PropertiesService.getUserProperties().setProperty('paramTriggerReportNotReceive', JSON.stringify(params))
+
+  ScriptApp.newTrigger('printReportKpsNotReceive')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  return 'File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+}
+
+function printReportKpsNotReceive(e) {
+  console.log('fungsi print Report Kps Not Receive ditrigger')
+
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerReportNotReceive')
+
+  var params
+
+  if (savedProperties) {
+    params = JSON.parse(savedProperties)
+  } else {
+    Logger.log('trigger tidak memiliki parameter')
+    return
+  }
+
+  var periode = params.periode
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Not Receive')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var sheetArea = spreadsheet.getSheetByName('Master Area')
   var lrKotak = sheetKotak.getLastRow()
@@ -55,18 +82,18 @@ function printReportKpsNotReceive(formData) {
 		var result = false
 		kotak.periode.forEach(element => {
 			var boxPeriode = Object.keys(element)[0]
-      console.log(kotak.labelKotak)
-      console.log(kotak.jenisDokumen)
+      // console.log(kotak.labelKotak)
+      // console.log(kotak.jenisDokumen)
       result = result || (parseInt(periode)===parseInt(boxPeriode) && kotak.status==='Terpakai' && kotak.jenisDokumen !== 'Consent Letter')
 		});
 		return result
 	})
-	console.log('sebelum for each kotak yg difilter')
-	console.log(res)
+	// console.log('sebelum for each kotak yg difilter')
+	// console.log(res)
 	// menghapus kps yg terdapat dalam filtered kotak
 	filteredKotak.forEach((data)=>{
-		console.log(data.labelKotak)
-    console.log(data.jenisDokumen)
+		// console.log(data.labelKotak)
+    // console.log(data.jenisDokumen)
 		data.area.forEach((area) => {
 			var boxArea = area
 			data.periode.filter((dataInside) => {
@@ -85,8 +112,8 @@ function printReportKpsNotReceive(formData) {
 		})
 	})
 
-	console.log('setelah for each kotak yg difilter')
-  console.log(res)
+	// console.log('setelah for each kotak yg difilter')
+  // console.log(res)
 
 	cr = 5
 	// res.forEach((data)=>{
@@ -108,7 +135,16 @@ function printReportKpsNotReceive(formData) {
     });
   }
 
+  
 	// console.log(res)
-  // generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`)
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`, 'Template Not Receive')
+
+  PropertiesService.getUserProperties().deleteProperty('paramTriggerReportNotReceive')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
 }

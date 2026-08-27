@@ -8,9 +8,41 @@ function showCetakLabelRange() {
     .showModalDialog(formCetakLabelRange, 'Form Cetak Label')
 }
 
-function printLabelBoxRange(awal, akhir) {
+function clickBtnGenerateLabelRange(awal, akhir) {
+  const params = {
+    awal: awal,
+    akhir: akhir,
+  }
+
+  PropertiesService.getUserProperties().setProperty('paramTriggerLabelRange', JSON.stringify(params))
+
+  ScriptApp.newTrigger('printLabelBoxRange')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  return 'File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+}
+
+function printLabelBoxRange(e) {
+  console.log('fungsi print Label Range ditrigger')
+
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerLabelRange')
+
+  var params
+
+  if (savedProperties) {
+    params = JSON.parse(savedProperties)
+  } else {
+    Logger.log('trigger tidak memiliki parameter')
+    return
+  }
+
+  var awal = params.awal
+  var akhir = params.akhir
+
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Label')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var lrKotak = sheetKotak.getLastRow()
   sheetTemplate.clear()
@@ -26,7 +58,7 @@ function printLabelBoxRange(awal, akhir) {
 
   var [typeBox, typeDoc, year, noAwal] = awal.split('/')
   var noAkhir = akhir.split('/')[3]
-  console.log(typeBox, typeDoc, year, noAwal, noAkhir)
+  // console.log(typeBox, typeDoc, year, noAwal, noAkhir)
 
   sheetKotak.getRange(2,1,lrKotak-1,11).getValues().forEach(kotak => {
     var [kotakTypeBox, kotakTypeDoc, kotakYear, kotakNo] = kotak[4].split('/')
@@ -40,6 +72,14 @@ function printLabelBoxRange(awal, akhir) {
     }
   });
 
-  var dataFile = generateAndSendLink('Template Label Kotak SCL')
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  var dataFile = generateAndSendLink('Template Label Kotak SCL', 'Template Label')
+  PropertiesService.getUserProperties().deleteProperty('paramTriggerLabelRange')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+
 }

@@ -8,10 +8,39 @@ function showFormCetakLaporanGudang() {
     .showModalDialog(formCetakLaporanGudang, 'Form Cetak Laporan Gudang')
 }
 
-function printReportGudang(gudang) {
+function clickBtnGenerateReportWarehouse(gudang) {
+  const params = {
+    gudang: gudang
+  }
+
+  PropertiesService.getUserProperties().setProperty('paramTriggerReportWarehouse', JSON.stringify(params))
+
+  ScriptApp.newTrigger('printReportGudang')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  return 'File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+}
+
+function printReportGudang(e) {
+  console.log('fungsi print Report Warehouse ditrigger')
+
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerReportWarehouse')
+
+  var params
+
+  if (savedProperties) {
+    params = JSON.parse(savedProperties)
+  } else {
+    Logger.log('trigger tidak memiliki parameter')
+    return
+  }
+
+  var gudang = params.gudang
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Warehouse')
   var lrSheetKotak = sheetKotak.getLastRow()
   var date = new Date()
   sheetTemplate.clear()
@@ -77,6 +106,14 @@ function printReportGudang(gudang) {
     // sheetTemplate.getRange(cr,8).setValue(kotak[11])
   })
 
-  // var dataFile = generateAndSendLink(`Laporan Data Gudang Per Tanggal - ${Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy")}`)
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  var dataFile = generateAndSendLink(`Laporan Data Gudang Per Tanggal - ${Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy")}`, 'Template Warehouse')
+  PropertiesService.getUserProperties().deleteProperty('paramTriggerReportWarehouse')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+
 }

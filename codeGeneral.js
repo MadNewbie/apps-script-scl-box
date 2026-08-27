@@ -187,10 +187,11 @@ function generateAndCleanupExcel(pNamefile) {
   }
 }
 
-function generateAndSendLink(pNameFile) {
+function generateAndSendLink(pNameFile, sheetName, sendTo) {
+  console.log('fungsi generate And Send Link ditrigger')
   // generate file
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheet = spreadsheet.getSheetByName('Report Template')
+  var sheet = spreadsheet.getSheetByName(sheetName)
   var newFile = SpreadsheetApp.create(pNameFile)
   var newFileId = newFile.getId()
   
@@ -239,13 +240,13 @@ function generateAndSendLink(pNameFile) {
       htmlBody: htmlBody
     })
 
-    console.log(`Email berhasil terkirim ke ${user}`)
+    console.log(`Email berhasil terkirim ke ${email}`)
   } catch (error) {
     console.log(`Error terjadi ketika menjalankan script: ${error.toString()}`)
   }
 }
 
-function deleteSentFile() {
+function deleteSentFile(e) {
   const scriptProperties = PropertiesService.getScriptProperties()
   const fileId = scriptProperties.getProperty('FILE_TO_DELETE')
 
@@ -258,6 +259,12 @@ function deleteSentFile() {
     }  finally {
       scriptProperties.deleteProperty('FILE_TO_DELETE')
     }
+  }
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
   }
 }
 
@@ -337,6 +344,16 @@ function getKpsDate(kps, periode) {
   return {
     startDate: startDate,
     endDate: endDate
+  }
+}
+
+function deleteTriggerByUid(uid) {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getUniqueId() === uid) {
+      ScriptApp.deleteTrigger(triggers[i]);
+      break;
+    }
   }
 }
 

@@ -8,10 +8,37 @@ function showCetakLaporanRetail() {
     .showModalDialog(formCetakLaporanRetail, 'Form Cetak Laporan Retail')
 }
 
-function printReportRetail(formData) {
-  var periode = formData.periode
+function clickBtnGenerateReportRetail(formData) {
+  const params = {
+    periode: formData.periode
+  }
+  PropertiesService.getUserProperties().setProperty('paramTriggerReportRetail', JSON.stringify(params))
+
+  ScriptApp.newTrigger('printReportRetail')
+    .timeBased()
+    .after(5*1000)
+    .create()
+
+  return 'File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+}
+
+function printReportRetail(e) {
+  console.log('fungsi print Report Retail ditrigger')
+
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerReportRetail')
+
+  var params
+
+  if (savedProperties) {
+    params = JSON.parse(savedProperties)
+  } else {
+    Logger.log('trigger tidak memiliki parameter')
+    return
+  }
+
+  var periode = params.periode
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheetTemplate = spreadsheet.getSheetByName('Report Template')
+  var sheetTemplate = spreadsheet.getSheetByName('Template Retail')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var sheetArea = spreadsheet.getSheetByName('Master Area')
   var lrKotak = sheetKotak.getLastRow()
@@ -81,6 +108,14 @@ function printReportRetail(formData) {
       sheetTemplate.getRange(cr+i+1,55).setValue(`=countif(B${cr+i+1}:BA${cr+i+1},"")`)
   }
   
-  var dataFile = generateAndSendLink(`Laporan KPS Retail Periode - ${periode}`)
-  return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+  var dataFile = generateAndSendLink(`Laporan KPS Retail Periode - ${periode}`, 'Template Retail')
+  // return 'File selesai diproses dan akan dikirim melalui email. Silahkan cek email. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)'
+
+  PropertiesService.getUserProperties().deleteProperty('paramTriggerReportRetail')
+
+  console.log(e)
+  if (e && e.triggerUid) {
+    const triggerId = e.triggerUid
+    deleteTriggerByUid(triggerId)
+  }
 }
