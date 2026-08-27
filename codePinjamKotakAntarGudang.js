@@ -29,7 +29,7 @@ function saveDataPinjamKotakAntarGudang(idKotakDipinjam, tujuanPeminjaman, gudan
     sheetPinjamKotak.getRange(lrPinjamKotak+1,6).setValue(user)
     sheetPinjamKotak.getRange(lrPinjamKotak+1,7).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
     sheetKotak.getRange(dataRow,8).setValue(gudangTujuan)
-    sheetKotak.getRange(dataRow,12).setValue('Dipinjam')
+    // sheetKotak.getRange(dataRow,12).setValue('Dipinjam')
     lrPinjamKotak = lrPinjamKotak + 1
   });
 

@@ -34,6 +34,7 @@ function saveDataPengembalianKotakAntarGudangSementara(idKotak, gudangTujuan) {
     var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues().findIndex((data)=>{return data[0]===id}) + 2
     var dataPinjamRow = sheetPinjamKotak.getRange(2,1,lrPinjamKotak-1,1).getValues().findIndex((data)=>{return data[0]===id})+2
     sheetKotak.getRange(dataRow,8).setValue(gudangTujuan)
+    sheetKotak.getRange(dataRow,12).setValue('')
     sheetPinjamKotak.getRange(dataPinjamRow,6).setValue('TRUE')
     sheetPinjamKotak.getRange(dataPinjamRow,9).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
     sheetPinjamKotak.getRange(dataPinjamRow,10).setValue(gudangTujuan)
