@@ -42,7 +42,7 @@ function printReportRetail(e) {
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var sheetArea = spreadsheet.getSheetByName('Master Area')
   var lrKotak = sheetKotak.getLastRow()
-  var lrArea = sheetKotak.getLastRow()
+  var lrArea = sheetArea.getLastRow()
   var date = new Date()
   sheetTemplate.clear()
 
