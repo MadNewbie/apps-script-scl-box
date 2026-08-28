@@ -42,7 +42,7 @@ function printReportKpsNotReceive(e) {
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var sheetArea = spreadsheet.getSheetByName('Master Area')
   var lrKotak = sheetKotak.getLastRow()
-  var lrArea = sheetKotak.getLastRow()
+  var lrArea = sheetArea.getLastRow()
   var date = new Date()
   var res = {}
   sheetTemplate.clear()
@@ -103,9 +103,13 @@ function printReportKpsNotReceive(e) {
 			}).forEach((dataInside) => {
 				var boxKps = Object.values(dataInside)[0]
         // console.log(boxKps)
-        // console.log(res[`${boxArea} ${data.jenisDokumen}`])
+        // console.log(res[`${boxArea}-${data.jenisDokumen}`])
+        // console.log(boxArea)
+        // console.log(data.jenisDokumen)
         // console.log(res[resKey])
 				var excludedKps = res[`${boxArea}-${data.jenisDokumen}`].filter((el)=>!boxKps.includes(el))
+        // console.log(res)
+        // console.log(data)
         // console.log(excludedKps)
         res[`${boxArea}-${data.jenisDokumen}`] = excludedKps
 			})

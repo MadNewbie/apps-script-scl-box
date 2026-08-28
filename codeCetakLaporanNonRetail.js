@@ -25,7 +25,7 @@ function clickBtnGenerateReportNonRetail(formData) {
 function printReportNonRetail(e) {
   console.log('fungsi print Report Retail ditrigger')
 
-  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerReportRetail')
+  const savedProperties = PropertiesService.getUserProperties().getProperty('paramTriggerReportNonRetail')
 
   var params
 
@@ -42,7 +42,7 @@ function printReportNonRetail(e) {
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
   var sheetArea = spreadsheet.getSheetByName('Master Area')
   var lrKotak = sheetKotak.getLastRow()
-  var lrArea = sheetKotak.getLastRow()
+  var lrArea = sheetArea.getLastRow()
   var date = new Date()
   sheetTemplate.clear()
 

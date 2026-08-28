@@ -75,18 +75,20 @@ function printReportGudang(e) {
         const periodeDiKotak = Object.keys(periode)[0]
         const kpsDiKotak = Object.values(periode)[0]
         // console.log(kpsDiKotak)
-        kpsDiKotak.forEach(kps => {
-          var kpsDate = getKpsDate(parseInt(kps),parseInt(periodeDiKotak))
-          sheetTemplate.getRange(cr,1).setValue(kotak.labelKotak)
-          sheetTemplate.getRange(cr,2).setValue(kotak.area.join(', '))
-          sheetTemplate.getRange(cr,3).setValue(kotak.jenisDokumen)
-          sheetTemplate.getRange(cr,4).setValue(kps)
-          sheetTemplate.getRange(cr,5).setValue(periodeDiKotak)
-          sheetTemplate.getRange(cr,6).setValue(kpsDate.startDate).setNumberFormat("dd-MMM-yyyy")
-          sheetTemplate.getRange(cr,7).setValue(kpsDate.endDate).setNumberFormat("dd-MMM-yyyy")
-          sheetTemplate.getRange(cr,8).setValue(kotak.catatan)
-          sheetTemplate.getRange(cr,9).setValue(kotak.statusKhusus)
-          cr++
+        kotak.area.forEach(area => {
+          kpsDiKotak.forEach(kps => {
+            var kpsDate = getKpsDate(parseInt(kps),parseInt(periodeDiKotak))
+            sheetTemplate.getRange(cr,1).setValue(kotak.labelKotak)
+            sheetTemplate.getRange(cr,2).setValue(area)
+            sheetTemplate.getRange(cr,3).setValue(kotak.jenisDokumen)
+            sheetTemplate.getRange(cr,4).setValue(kps)
+            sheetTemplate.getRange(cr,5).setValue(periodeDiKotak)
+            sheetTemplate.getRange(cr,6).setValue(kpsDate.startDate).setNumberFormat("dd-MMM-yyyy")
+            sheetTemplate.getRange(cr,7).setValue(kpsDate.endDate).setNumberFormat("dd-MMM-yyyy")
+            sheetTemplate.getRange(cr,8).setValue(kotak.catatan)
+            sheetTemplate.getRange(cr,9).setValue(kotak.statusKhusus)
+            cr++
+          })
         })
       } else {
         sheetTemplate.getRange(cr,1).setValue(kotak.labelKotak)

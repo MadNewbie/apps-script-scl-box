@@ -4,7 +4,7 @@ function clickBtnGenerateReportAmount() {
     .after(5*1000)
     .create()
 
-  window.alert('File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)')
+  SpreadsheetApp.getUi().alert('File masih diproses dan akan dikirim melalui email. Silahkan cek email secara berkala. Sesungguhnya Tuhan membersamai orang-orang yang sabar :)')
 }
 
 function printReportAmountNumber(e) {
