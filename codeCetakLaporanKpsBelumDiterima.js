@@ -2,7 +2,7 @@ function showCetakLaporanKpsBelumDiterima() {
   var formCetakLaporanKpsBelumDiterima = HtmlService
     .createHtmlOutputFromFile('formCetakLaporanKpsBelumDiterima')
     .setWidth(400)
-    .setHeight(200)
+    .setHeight(250)
     
   SpreadsheetApp.getUi()
     .showModalDialog(formCetakLaporanKpsBelumDiterima, 'Form Cetak Laporan KPS Belum Diterima')
@@ -10,7 +10,8 @@ function showCetakLaporanKpsBelumDiterima() {
 
 function clickBtnGenerateReportNotRecieve(formData) {
   const params = {
-    periode: formData.periode
+    periode: formData.periode,
+    jenisDokumen: formData.jenisDokumen
   }
   PropertiesService.getUserProperties().setProperty('paramTriggerReportNotReceive', JSON.stringify(params))
 
@@ -37,6 +38,7 @@ function printReportKpsNotReceive(e) {
   }
 
   var periode = params.periode
+  var jenisDokumen = params.jenisDokumen
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
   var sheetTemplate = spreadsheet.getSheetByName('Template Not Receive')
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
@@ -72,8 +74,7 @@ function printReportKpsNotReceive(e) {
 
 	//membuat model default data
 	for(var i=0;i<dataArea.length;i++){
-		res[`${dataArea[i]}-Retail`] = defKps
-		res[`${dataArea[i]}-Non Retail`] = defKps
+		res[`${dataArea[i]}#${jenisDokumen}`] = defKps
 		cr++
 	}
 
@@ -84,7 +85,7 @@ function printReportKpsNotReceive(e) {
 			var boxPeriode = Object.keys(element)[0]
       // console.log(kotak.labelKotak)
       // console.log(kotak.jenisDokumen)
-      result = result || (parseInt(periode)===parseInt(boxPeriode) && kotak.status==='Terpakai' && kotak.jenisDokumen !== 'Consent Letter')
+      result = result || (parseInt(periode)===parseInt(boxPeriode) && kotak.status==='Terpakai' && kotak.jenisDokumen === jenisDokumen)
 		});
 		return result
 	})
@@ -103,15 +104,15 @@ function printReportKpsNotReceive(e) {
 			}).forEach((dataInside) => {
 				var boxKps = Object.values(dataInside)[0]
         // console.log(boxKps)
-        // console.log(res[`${boxArea}-${data.jenisDokumen}`])
+        // console.log(res[`${boxArea}#${data.jenisDokumen}`])
         // console.log(boxArea)
         // console.log(data.jenisDokumen)
         // console.log(res[resKey])
-				var excludedKps = res[`${boxArea}-${data.jenisDokumen}`].filter((el)=>!boxKps.includes(el))
+				var excludedKps = res[`${boxArea}#${jenisDokumen}`].filter((el)=>!boxKps.includes(el))
         // console.log(res)
         // console.log(data)
         // console.log(excludedKps)
-        res[`${boxArea}-${data.jenisDokumen}`] = excludedKps
+        res[`${boxArea}#${data.jenisDokumen}`] = excludedKps
 			})
 		})
 	})
@@ -126,7 +127,7 @@ function printReportKpsNotReceive(e) {
 	// })
   for (const key in res) {
     if (!Object.hasOwn(res, key)) continue;
-    const [area, docType] = key.split('-')
+    const [area, docType] = key.split('#')
     const element = res[key];
     element.forEach(kps => {
       const kpsDate = getKpsDate(kps, periode)
@@ -141,7 +142,7 @@ function printReportKpsNotReceive(e) {
 
   
 	// console.log(res)
-  generateAndSendLink(`Laporan KPS Retail Dan Non Retail Yang Belum Diterima - ${periode}`, 'Template Not Receive')
+  generateAndSendLink(`Laporan KPS ${jenisDokumen} Yang Belum Diterima - ${periode}`, 'Template Not Receive')
 
   PropertiesService.getUserProperties().deleteProperty('paramTriggerReportNotReceive')
 
