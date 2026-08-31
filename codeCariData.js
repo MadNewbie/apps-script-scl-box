@@ -14,26 +14,40 @@ function getSearchDataByParam(pArea, pJenisDokumen, pKps, pPeriode) {
   var lrKotak = sheetKotak.getLastRow()
   var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues()
   var firstFilteredData = dataRow.filter((item) => { return((pArea==='' || pArea === item[5]) && (pJenisDokumen==='' || pJenisDokumen === item[2]) && item[8]!=='Rusak') })
+  var res = []
   // console.log(firstFilteredData)
-  var res = firstFilteredData.filter((item) => {
-    var rawKps = item[6]
-    var periodeAndKps = getPeriodesAndKpses(item[6])
-    var result = false
-    // console.log(periodeAndKps)
-    periodeAndKps.forEach((item) => {
-      var periode = Object.keys(item)[0]
-      var data = Object.values(item)[0]
-      // console.log(periode)
-      // console.log(data)
-      // console.log(`pPeriode==='': ${pPeriode===''}`)
-      // console.log(`parseInt(pPeriode)===parseInt(periode): ${parseInt(pPeriode)===parseInt(periode)}`)
-      // console.log(`pKps==='': ${pKps===''}`)
-      // console.log(`data.includes(pKps): ${data.includes(parseInt(pKps))}`)
-      result = result || ((pPeriode===''||parseInt(pPeriode)===parseInt(periode)) && (pKps===''||data.includes(parseInt(pKps))))
+  if (pJenisDokumen !== 'Consent Letter') {
+    res = firstFilteredData.filter((item) => {
+      var rawKps = item[6]
+      var periodeAndKps = getPeriodesAndKpses(item[6])
+      var result = false
+      // console.log(periodeAndKps)
+      periodeAndKps.forEach((item) => {
+        var periode = Object.keys(item)[0]
+        var data = Object.values(item)[0]
+        // console.log(periode)
+        // console.log(data)
+        // console.log(`pPeriode==='': ${pPeriode===''}`)
+        // console.log(`parseInt(pPeriode)===parseInt(periode): ${parseInt(pPeriode)===parseInt(periode)}`)
+        // console.log(`pKps==='': ${pKps===''}`)
+        // console.log(`data.includes(pKps): ${data.includes(parseInt(pKps))}`)
+        result = result || ((pPeriode===''||parseInt(pPeriode)===parseInt(periode)) && (pKps===''||data.includes(parseInt(pKps))))
+      })
+      // console.log(result)
+      return result
     })
-    // console.log(result)
-    return result
-  })
+  } else {
+    res = firstFilteredData.filter((item) => {
+      var rawKps = String(item[6])
+      console.log(item[6])
+      var periode = rawKps.split(', ')
+      var result = false
+      periode.forEach((data) => {
+        result = result || (pPeriode===''||parseInt(pPeriode)===parseInt(data))
+      })
+      return result
+    })
+  }
   // console.log(res)
   return res
 }
