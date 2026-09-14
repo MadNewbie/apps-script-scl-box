@@ -102,7 +102,7 @@ function getBoxLabel(pBoxType,pDocType,pYear) {
   var lrDocType = sheetDocType.getLastRow()
 
   //mengambil nomor berdasarkan jenis kotak per tahun
-  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===boxType)&&(x[1]===docType)&&(new Date(x[12]).getFullYear()===year)).length + 1
+  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===boxType)&&(x[1]===docType)&&(new Date(x[12]).getFullYear()===year)&&(x[7]==='Terpakai')).length + 1
 
   //mengambil kode jenis dokumen
   docTypeCode = sheetDocType.getRange(sheetDocType.getRange(1,1,lrDocType,2).getValues().findIndex(x=>x[0]===docType)+1,2).getValue()
