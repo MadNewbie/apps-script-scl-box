@@ -67,7 +67,7 @@ function saveDataTambahKotak(formData) {
   year = new Date().getFullYear()
 
   //nomor kotak per tahun per jenis
-  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===formData.jenisKotak)&&(x[1]===formData.jenisDokumen)&&(new Date(x[12]).getFullYear()===year)).length + 1
+  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===formData.jenisKotak)&&(x[1]===formData.jenisDokumen)&&(new Date(x[12]).getFullYear()===year)&&(x[7]==='Terpakai')).length + 1
 
   sheet.getRange(lastRow + 1, 1).setValue(formData.jenisKotak+"."+nextNo)
   sheet.getRange(lastRow + 1, 2).setValue(formData.jenisKotak)
