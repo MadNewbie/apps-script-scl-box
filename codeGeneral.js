@@ -361,3 +361,33 @@ function deleteTriggerByUid(uid) {
 //   var kotak = getAllDataAsObject()
 //   console.log(kotak)
 // }
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Manajemen Kotak')
+    .addItem('Cari Kotak', 'showCariData')
+    .addItem('Tambah Kotak Baru', 'showTambahKotakBaruForm')
+    .addItem('Kotak Baru Hilang', 'showFormKotakBaruHilang')
+    .addItem('Tambah Kotak', 'showTambahKotakForm')
+    .addItem('Ubah Kotak', 'showUbahKotakForm')
+    .addItem('Kotak Hilang', 'showKotakHilang')
+    .addItem('Kotak Rusak', 'showKotakRusak')
+    .addToUi()
+
+  SpreadsheetApp.getUi()
+    .createMenu('Pemindahan / Pengembalian Kotak')
+    .addItem('Pinjam Kotak','showPinjamKotakAntarGudangSementara')
+    .addItem('Transfer Kotak Antar Gudang', 'showPinjamKotakAntarGudang')
+    .addItem('Pengembalian Kotak','showPengembalianKotakAntarGudangSementara')
+    .addToUi()
+
+  SpreadsheetApp.getUi()
+    .createMenu('Cetak Laporan / File')
+    .addItem('Cetak Label Kotak', 'showCetakLabelRange')
+    .addItem('Cetak Laporan Retail', 'showCetakLaporanRetail')
+    .addItem('Cetak Laporan Non Retail', 'showCetakLaporanNonRetail')
+    .addItem('Cetak Laporan KPS Belum Diterima', 'showCetakLaporanKpsBelumDiterima')
+    .addItem('Cetak Laporan Gudang','showFormCetakLaporanGudang')
+    .addItem('Cetak Laporan Jumlah Kardus', 'clickBtnGenerateReportAmount')
+    .addToUi()
+}
