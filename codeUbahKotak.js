@@ -63,39 +63,79 @@ function processedPeriode(data, typeDoc) {
 }
 
 function updateDataKotak(formData) {
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheet =  spreadsheet.getSheetByName('Kotak')
-  var lrKotak = sheet.getLastRow()
-  var dataRow = sheet.getRange(2,1,lrKotak-1,1).getValues().findIndex((data)=>{return data[0]===formData.kodeKotak}) + 2
-  var user = Session.getActiveUser().getEmail()
-  var date = new Date()
+  const action = 'kuh'
+  const data = {...formData}
+  const permission = checkPermission(action)
 
   //proses area
-  area = formData.area.join(", ")
+  data.area = formData.area.join(", ")
 
   //proses KPS
+  let rawKps = []
   if (formData.jenisDokumen !== 'Consent Letter'){
-    rawKps = []
     for(let i=formData.awalPeriode; i<=formData.akhirPeriode; i++){
       rawKps.push("KPS "+formatKps(formData[`kps[${i}]`])+" ("+ i +")")
     }
   }
 
-  sheet.getRange(dataRow, 2).setValue(formData.jenisKotak)
-  sheet.getRange(dataRow, 3).setValue(formData.jenisDokumen)
-  sheet.getRange(dataRow, 5).setValue(formData.labelKotak)
-  sheet.getRange(dataRow, 6).setValue(area)
-  if (formData.jenisDokumen != 'Consent Letter') {
-    sheet.getRange(dataRow, 7).setValue(rawKps.join(";"))
-  }else{
-    sheet.getRange(dataRow, 7).setValue(formData.periode)
+  data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
+  data.user = permission.user
+  data.action = action
+  data.rawKps = rawKps.join(";")
+
+  
+  const responseFromBE = sendDataToBE(data)
+
+  if (responseFromBE.success) {
+    return responseFromBE.message
+  } else {
+    throw new Error(responseFromBE.message)
   }
-  sheet.getRange(dataRow, 8).setValue(formData.gudang)
-  sheet.getRange(dataRow, 10).setValue(formData.catatan)
-  sheet.getRange(dataRow, 11).setValue(formData.dokumenLain)
+}
+
+function kotakUbah(param) {
+  var spreadsheet = SpreadsheetApp.openById(param.fileId)
+
+  if (!spreadsheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "File tidak ditemukan",
+    })
+  }
+
+  var sheet = spreadsheet.getSheetByName('Kotak')
+  
+  if (!sheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
+  var lrKotak = sheet.getLastRow()
+  var dataRow = sheet.getRange(2,1,lrKotak-1,1).getValues().findIndex((data)=>{return data[0]===param.kodeKotak}) + 2
+  var user = param.user
+  var date = new Date()
+
+  sheet.getRange(dataRow, 2).setValue(param.jenisKotak)
+  sheet.getRange(dataRow, 3).setValue(param.jenisDokumen)
+  sheet.getRange(dataRow, 5).setValue(param.labelKotak)
+  sheet.getRange(dataRow, 6).setValue(param.area)
+  if (param.jenisDokumen != 'Consent Letter') {
+    sheet.getRange(dataRow, 7).setValue(param.rawKps)
+  }else{
+    sheet.getRange(dataRow, 7).setValue(param.periode)
+  }
+  sheet.getRange(dataRow, 8).setValue(param.gudang)
+  sheet.getRange(dataRow, 10).setValue(param.catatan)
+  sheet.getRange(dataRow, 11).setValue(param.dokumenLain)
   sheet.getRange(dataRow, 16).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
   sheet.getRange(dataRow, 17).setValue(user)
-  return 'Berhasil mengubah data'
+
+  return jsonResponse({
+    'code':200,
+    'message':'Berhasil mengubah data'
+  })
 }
 
 // function debug() {

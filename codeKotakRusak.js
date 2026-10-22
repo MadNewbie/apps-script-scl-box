@@ -18,19 +18,73 @@ function getAvailDataKotakRusak(gudang) {
 }
 
 function saveDataKotakRusak(idKotakRusak, kronologiRusak) {
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  const action = 'krk'
+  let data = {}
+  const permission = checkPermission(action)
+
+  //proses kotak hilang
+  data.idKotakRusak = idKotakRusak.join(",")
+  data.kronologiRusak = kronologiRusak
+  data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
+  data.user = permission.user
+  data.action = action
+
+  const responseFromBE = sendDataToBE(data)
+
+  if (responseFromBE.success) {
+    return responseFromBE.message
+  } else {
+    throw new Error(responseFromBE.message)
+  }
+}
+
+function kotakRusak(param) {
+  var spreadsheet = SpreadsheetApp.openById(param.fileId)
+
+  if (!spreadsheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "File tidak ditemukan",
+    })
+  }
 
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
+
+  if (!sheetKotak) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
   var lrKotak = sheetKotak.getLastRow()
 
   var sheetKotakRusak = spreadsheet.getSheetByName('Riwayat Kotak Rusak')
+
+  if (!sheetKotakRusak) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
   var lrKotakRusak = sheetKotakRusak.getLastRow()
 
   var sheetJmlKotak = spreadsheet.getSheetByName('Jumlah Kotak')
+
+  if (!sheetJmlKotak) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
   var lrJmlKotak = sheetJmlKotak.getLastRow()
 
-  var user = Session.getActiveUser().getEmail()
+  var user = param.user
   var date = new Date()
+
+  const idKotakRusak = param.idKotakRusak.split(",")
 
   idKotakRusak.forEach((id) => {
     var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues().findIndex((data)=>{return data[0]===id})+2
@@ -63,9 +117,13 @@ function saveDataKotakRusak(idKotakRusak, kronologiRusak) {
     sheetKotakRusak.getRange(lrKotakRusak+1,4).setValue(sheetKotak.getRange(dataRow,8).getValue())
     sheetKotakRusak.getRange(lrKotakRusak+1,5).setValue(user)
     sheetKotakRusak.getRange(lrKotakRusak+1,6).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
-    sheetKotakRusak.getRange(lrKotakRusak+1,7).setValue(kronologiRusak)
+    sheetKotakRusak.getRange(lrKotakRusak+1,7).setValue(param.kronologiRusak)
     lrKotak = lrKotak + 1
     lrKotakRusak = lrKotakRusak + 1
   })
-  return 'Berhasil mencatat data kotak rusak'
+
+  return jsonResponse({
+    'code': 200,
+    'message': "Berhasil mencatat data kotak rusak",
+  })
 }

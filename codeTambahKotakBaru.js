@@ -9,16 +9,53 @@ function showTambahKotakBaruForm() {
 }
 
 function saveDataTambahKotakBaru(formData) {
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  var sheet = spreadsheet.getSheetByName('Riwayat Kotak Baru')
-  var lastRow = sheet.getLastRow()
-  var user = Session.getActiveUser().getEmail()
+  const action = 'kbt'
+  const data = {...formData}
+  const permission = checkPermission(action)
 
-  sheet.getRange(lastRow+1, 1).setValue(formData.jenisKotak)
-  sheet.getRange(lastRow+1, 2).setValue(formData.jumlahKotak)
+  data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
+  data.user = permission.user
+  data.action = action
+
+  const responseFromBE = sendDataToBE(data)
+
+  if (responseFromBE.success) {
+    return responseFromBE.message
+  } else {
+    throw new Error(responseFromBE.message)
+  }
+}
+
+function kotakBaruTambah(param) {
+  var spreadsheet = SpreadsheetApp.openById(param.fileId)
+
+  if (!spreadsheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "File tidak ditemukan",
+    })
+  }
+
+  var sheet = spreadsheet.getSheetByName('Riwayat Kotak Baru')
+  
+  if (!sheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
+  var lastRow = sheet.getLastRow()
+  var user = param.user
+
+  sheet.getRange(lastRow+1, 1).setValue(param.jenisKotak)
+  sheet.getRange(lastRow+1, 2).setValue(param.jumlahKotak)
   sheet.getRange(lastRow+1, 3).setValue(new Date())
-  sheet.getRange(lastRow+1, 4).setValue(formData.gudang)
+  sheet.getRange(lastRow+1, 4).setValue(param.gudang)
   sheet.getRange(lastRow+1, 5).setValue(user)
 
-  return 'Berhasil memasukkan riwayat kotak baru'
+  return jsonResponse({
+    'code':200,
+    'message':'Berhasil memasukkan riwayat kotak baru'
+  })
 }

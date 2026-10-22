@@ -195,7 +195,7 @@
           .withSuccessHandler(function (message) {
             window.alert(message)
             document.getElementById('btnSubmit').disabled = false
-            document.getElementById('btnSubmit').classList.add('loading')
+            document.getElementById('btnSubmit').classList.remove('loading')
             document.getElementById('formKotakHilang').reset()
             document.getElementById('dataKotak').textContent = ''
           })

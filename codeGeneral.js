@@ -1,3 +1,5 @@
+const WEB_APP_URL = `https://script.google.com/macros/s/AKfycbxD6LpV6L02VTcFrHdAsAHs-IYEfOpKZBnS4mmWrS2lPFX3SE1i7_mn9WmRGT9fTrT4/exec`
+
 function getDropdownJenisKotakData() {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
   var sheet = spreadsheet.getSheetByName('Master Jenis Kotak')
@@ -364,10 +366,14 @@ function deleteTriggerByUid(uid) {
 
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu('Manajemen Kotak')
-    .addItem('Cari Kotak', 'showCariData')
+    .createMenu('Manajemen Kotak Baru')
     .addItem('Tambah Kotak Baru', 'showTambahKotakBaruForm')
     .addItem('Kotak Baru Hilang', 'showFormKotakBaruHilang')
+    .addToUi()
+
+  SpreadsheetApp.getUi()
+    .createMenu('Manajemen Kotak')
+    .addItem('Cari Kotak', 'showCariData')
     .addItem('Tambah Kotak', 'showTambahKotakForm')
     .addItem('Ubah Kotak', 'showUbahKotakForm')
     .addItem('Kotak Hilang', 'showKotakHilang')
@@ -390,4 +396,96 @@ function onOpen() {
     .addItem('Cetak Laporan Gudang','showFormCetakLaporanGudang')
     .addItem('Cetak Laporan Jumlah Kardus', 'clickBtnGenerateReportAmount')
     .addToUi()
+}
+
+function checkPermission(action) {
+  const user = Session.getActiveUser().getEmail()
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+  const sheet = ss.getSheetByName('Daftar Akses')
+
+  if (!sheet) {
+    return {
+      "access": false,
+      "message": "Halaman Daftar Akses tidak ditemukan"
+    }
+  }
+
+  const lr = sheet.getLastRow()
+  const lc = sheet.getLastColumn()
+
+  const actionList = sheet.getRange(1,2,1,lc-1).getValues()[0]
+  let actionColumn = 0
+
+  const userList = sheet.getRange(2,1,lr-1,1).getValues().map((data) => { 
+    return data[0] 
+  })
+  let userRow = 0
+
+  actionList.forEach((act,idx) => {
+    if (action === act) {
+      actionColumn = idx + 2
+    }
+  })
+
+  userList.forEach((usr,idx) => {
+    if (usr === user) {
+      userRow = idx + 2
+    }
+  })
+
+  if (actionColumn < 2) {
+    return {
+      "access": false,
+      "message": "Aksi tidak ditemukan"
+    }
+  } 
+
+  if (userRow < 2) {
+    return {
+      "access": false,
+      "message": "User tidak ditemukan"
+    }
+  } 
+
+  const checkAccess = sheet.getRange(userRow,actionColumn).getValue()
+  if (checkAccess) {
+    return {
+      "access": true,
+      "message": "Monggo Bos",
+      "user": user
+    }
+  } else {
+    return {
+      "access": false,
+      "message": "User tidak diperbolehkan mengakses menu ini"
+    }
+  }
+}
+
+function sendDataToBE(data) {
+  const response = UrlFetchApp.fetch(WEB_APP_URL, {
+    method:'POST',
+    payload: data,
+    muteHttpExceptions: true
+  })
+
+  console.log(`fungsi sendDataToBE: `)
+  console.log(response.toString())
+
+  const formattedJson = JSON.parse(response.toString())
+
+  const message = formattedJson.message
+  const statusCode = formattedJson.code
+
+  if (statusCode == 200) {
+    return {
+      'success': true,
+      'message': message
+    }
+  } else {
+    return {
+      'success': false,
+      'message': message
+    }
+  }
 }

@@ -148,8 +148,8 @@
         var elDataKotak = document.getElementById('dataKotak')
         elDataKotak.textContent = ''
         const sorted = data.sort((a,b) => {
-          const valA = a[4]
-          const valB = b[4]
+          const valA = a[1]
+          const valB = b[1]
 
           const[aTypeBox, aTypeDoc, aYear, aNo] = valA.split('/')
           const[bTypeBox, bTypeDoc, bYear, bNo] = valB.split('/')

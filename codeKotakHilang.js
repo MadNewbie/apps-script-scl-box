@@ -18,16 +18,62 @@ function getAvailDataKotakHilang(gudang) {
 }
 
 function saveDataKotakHilang(idKotakHilang, kronologiHilang) {
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  const action = 'khg'
+  let data = {}
+  const permission = checkPermission(action)
+
+  //proses kotak hilang
+  data.idKotakHilang = idKotakHilang.join(",")
+  data.kronologiHilang = kronologiHilang
+  data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
+  data.user = permission.user
+  data.action = action
+
+  const responseFromBE = sendDataToBE(data)
+
+  if (responseFromBE.success) {
+    return responseFromBE.message
+  } else {
+    throw new Error(responseFromBE.message)
+  }
+}
+
+function kotakHilang(param) {
+  var spreadsheet = SpreadsheetApp.openById(param.fileId)
+
+  if (!spreadsheet) {
+    return jsonResponse({
+      'code': 404,
+      'message': "File tidak ditemukan",
+    })
+  }
 
   var sheetKotak = spreadsheet.getSheetByName('Kotak')
+
+  if (!sheetKotak) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
   var lrKotak = sheetKotak.getLastRow()
 
   var sheetKotakHilang = spreadsheet.getSheetByName('Riwayat Kotak Hilang')
+
+  if (!sheetKotakHilang) {
+    return jsonResponse({
+      'code': 404,
+      'message': "Sheet tidak ditemukan",
+    })
+  }
+
   var lrKotakHilang = sheetKotakHilang.getLastRow()
 
-  var user = Session.getActiveUser().getEmail()
+  var user = param.user
   var date = new Date()
+
+  const idKotakHilang = param.idKotakHilang.split(",")
 
   idKotakHilang.forEach((id) => {
     var dataRow = sheetKotak.getRange(2,1,lrKotak-1,11).getValues().findIndex((data)=>{return data[0]===id})+2
@@ -37,8 +83,12 @@ function saveDataKotakHilang(idKotakHilang, kronologiHilang) {
     sheetKotakHilang.getRange(lrKotakHilang+1,3).setValue(sheetKotak.getRange(dataRow,8).getValue())
     sheetKotakHilang.getRange(lrKotakHilang+1,4).setValue(user)
     sheetKotakHilang.getRange(lrKotakHilang+1,5).setValue(Utilities.formatDate(date,"Asia/Bangkok","dd MMMM yyyy HH:mm:ss"))
-    sheetKotakHilang.getRange(lrKotakHilang+1,6).setValue(kronologiHilang)
+    sheetKotakHilang.getRange(lrKotakHilang+1,6).setValue(param.kronologiHilang)
     lrKotakHilang = lrKotakHilang + 1
   })
-  return 'Berhasil mencatat data kotak hilang'
+
+  return jsonResponse({
+    'code': 200,
+    'message': "Berhasil mencatat data kotak hilang",
+  })
 }
