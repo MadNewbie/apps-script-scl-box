@@ -71,7 +71,7 @@ function getPeriodesAndKpses(data) {
           dataKpsArr.push(i)
         }
       } else {
-        dataKpsArr.push(dataKpsStringThrd)
+        dataKpsArr.push(parseInt(dataKpsStringThrd[0]))
       }
     })
     res.push({[periode]:dataKpsArr})
