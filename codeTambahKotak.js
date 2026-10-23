@@ -114,7 +114,7 @@ function kotakTambah(param) {
   year = new Date().getFullYear()
 
   //nomor kotak per tahun per jenis
-  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===param.jenisKotak)&&(x[1]===param.jenisDokumen)&&(new Date(x[12]).getFullYear()===year)&&(x[7]==='Terpakai')).length + 1
+  nextNoYear = lastRow == 1 ? 1 : sheet.getRange(2,2,lastRow-1,13).getValues().filter(x=>(x[0]===param.jenisKotak)&&(x[1]===param.jenisDokumen)&&(new Date(x[12]).getFullYear()===year)&&(x[7]==='Terpakai'||x[7]==='Hilang')).length + 1
 
   sheet.getRange(lastRow + 1, 1).setValue(param.jenisKotak+"."+nextNo)
   sheet.getRange(lastRow + 1, 2).setValue(param.jenisKotak)
