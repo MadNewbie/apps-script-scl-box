@@ -45,6 +45,10 @@ function saveDataTambahKotak(formData) {
   const data = {...formData}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   //proses area
   data.area = formData.area.join(", ")
 

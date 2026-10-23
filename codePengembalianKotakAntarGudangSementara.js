@@ -24,14 +24,16 @@ function saveDataPengembalianKotakAntarGudangSementara(idKotak, gudangTujuan) {
   let data = {}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   //proses kotak pinjam
   data.idKotak = idKotak.join(",")
   data.gudangTujuan = gudangTujuan
   data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
   data.user = permission.user
   data.action = action
-
-  console.log(data)
 
   const responseFromBE = sendDataToBE(data)
 

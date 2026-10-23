@@ -13,6 +13,10 @@ function saveDataKotakBaruHilang(formData) {
   const data = {...formData}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   data.fileId = SpreadsheetApp.getActiveSpreadsheet().getId()
   data.user = permission.user
   data.action = action

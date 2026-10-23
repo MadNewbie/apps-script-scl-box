@@ -22,6 +22,10 @@ function saveDataKotakHilang(idKotakHilang, kronologiHilang) {
   let data = {}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   //proses kotak hilang
   data.idKotakHilang = idKotakHilang.join(",")
   data.kronologiHilang = kronologiHilang

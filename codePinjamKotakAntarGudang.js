@@ -13,6 +13,10 @@ function saveDataPinjamKotakAntarGudang(idKotakDipinjam, tujuanPeminjaman, gudan
   let data = {}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   //proses kotak pinjam
   data.idKotakDipinjam = idKotakDipinjam.join(",")
   data.tujuanPeminjaman = tujuanPeminjaman

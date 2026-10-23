@@ -22,6 +22,10 @@ function saveDataKotakRusak(idKotakRusak, kronologiRusak) {
   let data = {}
   const permission = checkPermission(action)
 
+  if (!permission.access) {
+    return permission.message
+  }
+
   //proses kotak hilang
   data.idKotakRusak = idKotakRusak.join(",")
   data.kronologiRusak = kronologiRusak
